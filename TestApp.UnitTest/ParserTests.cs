@@ -39,11 +39,11 @@ namespace TestApp.UnitTest
         [Fact]
         public void WholeInterval()
         {
-            Assert.Equal(new ScheduleFormatEntry(0, null, null), ParserHelper.WholeIntervalParser.ParseOrThrow("0"));
-            Assert.Equal(new ScheduleFormatEntry(1, null, null), ParserHelper.WholeIntervalParser.ParseOrThrow("1"));
+            Assert.Equal(ScheduleFormatEntry.SinglePoint(0), ParserHelper.WholeIntervalParser.ParseOrThrow("0"));
+            Assert.Equal(ScheduleFormatEntry.SinglePoint(1), ParserHelper.WholeIntervalParser.ParseOrThrow("1"));
             Assert.Equal(new ScheduleFormatEntry(1, 10, null),
                 ParserHelper.WholeIntervalParser.ParseOrThrow("1-10"));
-            Assert.Equal(new ScheduleFormatEntry(null, null, null),
+            Assert.Equal(ScheduleFormatEntry.Always,
                 ParserHelper.WholeIntervalParser.ParseOrThrow("*"));
             Assert.Equal(new ScheduleFormatEntry(null, null, 24),
                 ParserHelper.WholeIntervalParser.ParseOrThrow("*/24"));
@@ -64,13 +64,13 @@ namespace TestApp.UnitTest
         [Fact]
         public void IntervalsSequence()
         {
-            Assert.Equal(new[] {new ScheduleFormatEntry(0, null, null)},
+            Assert.Equal(new[] {ScheduleFormatEntry.SinglePoint(0)},
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("0"));
-            Assert.Equal(new[] {new ScheduleFormatEntry(1, null, null)},
+            Assert.Equal(new[] {ScheduleFormatEntry.SinglePoint(1)},
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("1"));
             Assert.Equal(new[] {new ScheduleFormatEntry(1, 10, null)},
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("1-10"));
-            Assert.Equal(new[] {new ScheduleFormatEntry(null, null, null)},
+            Assert.Equal(new[] {ScheduleFormatEntry.Always},
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("*"));
             Assert.Equal(new[] {new ScheduleFormatEntry(null, null, 24)},
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("*/24"));
@@ -78,12 +78,12 @@ namespace TestApp.UnitTest
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("1/24"));
             Assert.Equal(new[] {new ScheduleFormatEntry(1, 15, 24)},
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("1-15/24"));
-            Assert.Equal(new[] {new ScheduleFormatEntry(0, null, null), new ScheduleFormatEntry(1, 15, 24)},
+            Assert.Equal(new[] {ScheduleFormatEntry.SinglePoint(0), new ScheduleFormatEntry(1, 15, 24)},
                 ParserHelper.IntervalsSequenceParser.ParseOrThrow("0,1-15/24"));
             Assert.Equal(new[]
                 {
-                    new ScheduleFormatEntry(1, null, null),
-                    new ScheduleFormatEntry(2, null, null),
+                    ScheduleFormatEntry.SinglePoint(1),
+                    ScheduleFormatEntry.SinglePoint(2),
                     new ScheduleFormatEntry(3, 5, null),
                     new ScheduleFormatEntry(10, 20, 3)
                 },
@@ -104,24 +104,24 @@ namespace TestApp.UnitTest
         public void Date()
         {
              AssertEqualDates(new ScheduleDate(
-                     new[] {new ScheduleFormatEntry(2011, null, null)},
-                     new[] {new ScheduleFormatEntry(1, null, null)},
-                     new[] {new ScheduleFormatEntry(1, null, null)}
+                     new[] {ScheduleFormatEntry.SinglePoint(2011)},
+                     new[] {ScheduleFormatEntry.SinglePoint(1)},
+                     new[] {ScheduleFormatEntry.SinglePoint(1)}
                  ),
                  ParserHelper.DateParser.ParseOrThrow("2011.01.01"));
              AssertEqualDates(new ScheduleDate(
                      new[]
                      {
-                         new ScheduleFormatEntry(2010, null, null),
+                         ScheduleFormatEntry.SinglePoint(2010),
                          new ScheduleFormatEntry(2011, 2020, 3)
                      },
-                     new[] {new ScheduleFormatEntry(1, null, null)},
-                     new[] {new ScheduleFormatEntry(1, null, null)}
+                     new[] {ScheduleFormatEntry.SinglePoint(1)},
+                     new[] {ScheduleFormatEntry.SinglePoint(1)}
                  ),
                  ParserHelper.DateParser.ParseOrThrow("2010,2011-2020/3.01.01"));
              AssertEqualDates(new ScheduleDate(
-                     new[] {new ScheduleFormatEntry(null, null, null)},
-                     new[] {new ScheduleFormatEntry(9, null, null)},
+                     new[] {ScheduleFormatEntry.Always},
+                     new[] {ScheduleFormatEntry.SinglePoint(9)},
                      new[] {new ScheduleFormatEntry(null, null, 2)}
                  ),
                  ParserHelper.DateParser.ParseOrThrow("*.9.*/2"));
@@ -145,42 +145,42 @@ namespace TestApp.UnitTest
         public void Time()
         {
             AssertEqualTimes(new ScheduleTime(
-                    new[] {new ScheduleFormatEntry(10, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)}
+                    new[] {ScheduleFormatEntry.SinglePoint(10)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)}
                 ),
                 ParserHelper.TimeParser.ParseOrThrow("10:00:00.000"));
             
             AssertEqualTimes(new ScheduleTime(
-                    new[] {new ScheduleFormatEntry(10, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)}
+                    new[] {ScheduleFormatEntry.SinglePoint(10)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)}
                 ),
                 ParserHelper.TimeParser.ParseOrThrow("10:00:00"));
             
             AssertEqualTimes(new ScheduleTime(
-                    new[] {new ScheduleFormatEntry(null, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)}
+                    new[] {ScheduleFormatEntry.Always},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)}
                 ),
                 ParserHelper.TimeParser.ParseOrThrow("*:00:00"));
             
             AssertEqualTimes(new ScheduleTime(
-                    new[] {new ScheduleFormatEntry(null, null, null)},
-                    new[] {new ScheduleFormatEntry(null, null, null)},
-                    new[] {new ScheduleFormatEntry(null, null, null)},
-                    new[] {new ScheduleFormatEntry(0, null, null)}
+                    new[] {ScheduleFormatEntry.Always},
+                    new[] {ScheduleFormatEntry.Always},
+                    new[] {ScheduleFormatEntry.Always},
+                    new[] {ScheduleFormatEntry.SinglePoint(0)}
                 ),
                 ParserHelper.TimeParser.ParseOrThrow("*:*:*"));
             
             AssertEqualTimes(new ScheduleTime(
-                    new[] {new ScheduleFormatEntry(null, null, null)},
-                    new[] {new ScheduleFormatEntry(null, null, null)},
-                    new[] {new ScheduleFormatEntry(null, null, null)},
-                    new[] {new ScheduleFormatEntry(null, null, null)}
+                    new[] {ScheduleFormatEntry.Always},
+                    new[] {ScheduleFormatEntry.Always},
+                    new[] {ScheduleFormatEntry.Always},
+                    new[] {ScheduleFormatEntry.Always}
                 ),
                 ParserHelper.TimeParser.ParseOrThrow("*:*:*.*"));
             
@@ -231,33 +231,47 @@ namespace TestApp.UnitTest
         [Fact]
         public void FullFormat()
         {
-            // AssertEqualFormat(new ScheduleFormat(new ScheduleDate(
-            //             new[] {new ScheduleFormatEntry(null, null, null)},
-            //             new[] {new ScheduleFormatEntry(9, null, null)},
-            //             new[] {new ScheduleFormatEntry(null, null, 2)}
-            //         ),
-            //         new []{new ScheduleFormatEntry(1, 5, null)},
-            //         new ScheduleTime(
-            //             new[] {new ScheduleFormatEntry(10, null, null)},
-            //             new[] {new ScheduleFormatEntry(0, null, null)},
-            //             new[] {new ScheduleFormatEntry(0, null, null)},
-            //             new[] {new ScheduleFormatEntry(0, null, null)}
-            //         )),
-            //     ParserHelper.FullFormatParser.ParseOrThrow("*.9.*/2 1-5 10:00:00.000"));
-            
             AssertEqualFormat(new ScheduleFormat(new ScheduleDate(
-                        new[] {new ScheduleFormatEntry(null, null, null)},
-                        new[] {new ScheduleFormatEntry(null, null, null)},
-                        new[] {new ScheduleFormatEntry(null, null, null)}
+                        new[] {ScheduleFormatEntry.Always},
+                        new[] {ScheduleFormatEntry.SinglePoint(9)},
+                        new[] {new ScheduleFormatEntry(null, null, 2)}
                     ),
                     new []{new ScheduleFormatEntry(1, 5, null)},
                     new ScheduleTime(
-                        new[] {new ScheduleFormatEntry(10, null, null)},
-                        new[] {new ScheduleFormatEntry(0, null, null)},
-                        new[] {new ScheduleFormatEntry(0, null, null)},
-                        new[] {new ScheduleFormatEntry(0, null, null)}
+                        new[] {ScheduleFormatEntry.SinglePoint(10)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)}
+                    )),
+                ParserHelper.FullFormatParser.ParseOrThrow("*.9.*/2 1-5 10:00:00.000"));
+            
+            AssertEqualFormat(new ScheduleFormat(new ScheduleDate(
+                        new[] {ScheduleFormatEntry.Always},
+                        new[] {ScheduleFormatEntry.Always},
+                        new[] {ScheduleFormatEntry.Always}
+                    ),
+                    new []{new ScheduleFormatEntry(1, 5, null)},
+                    new ScheduleTime(
+                        new[] {ScheduleFormatEntry.SinglePoint(10)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)}
                     )),
                 ParserHelper.FullFormatParser.ParseOrThrow("1-5 10:00:00.000"));
+            
+            AssertEqualFormat(new ScheduleFormat(new ScheduleDate(
+                        new[] {ScheduleFormatEntry.Always},
+                        new[] {ScheduleFormatEntry.Always},
+                        new[] {ScheduleFormatEntry.Always}
+                    ),
+                    new []{ScheduleFormatEntry.Always},
+                    new ScheduleTime(
+                        new[] {ScheduleFormatEntry.SinglePoint(10)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)},
+                        new[] {ScheduleFormatEntry.SinglePoint(0)}
+                    )),
+                ParserHelper.FullFormatParser.ParseOrThrow("10:00:00.000"));
         }
 
         private static void AssertEqualDates(ScheduleDate expected, ScheduleDate actual)

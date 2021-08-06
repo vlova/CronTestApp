@@ -62,13 +62,20 @@ namespace TestApp
             from sec in Validate(IntervalsSequenceParser, ValidateBoundsParser("Sec", 0, 59))
             from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBoundsParser("Millis", 0, 999))).Optional())
                 .Map(MapMaybe)
-            select new ScheduleTime(hours, min, sec, millis ?? new[] {new ScheduleFormatEntry(0, null, null)});
+            select new ScheduleTime(hours, min, sec, millis ?? new[] {ScheduleFormatEntry.SinglePoint(0)});
 
         public static Parser<char, ScheduleFormat> FullFormatParser { get; } =
             from date in Try(DateParser).Before(Char(' ')).Optional().Map(MapMaybe)
             from dayOfWeek in Try(DayOfWeekParser.Before(Char(' '))).Optional().Map(MapMaybe)
             from time in TimeParser
-            select new ScheduleFormat(date, dayOfWeek, time);
+            select new ScheduleFormat(
+                date ?? new ScheduleDate(
+                    new []{ScheduleFormatEntry.Always},
+                    new []{ScheduleFormatEntry.Always},
+                    new []{ScheduleFormatEntry.Always}
+                    ), 
+                dayOfWeek ?? new []{ScheduleFormatEntry.Always}, 
+                time);
 
         private static Parser<char, ScheduleFormatEntry[]> Validate(Parser<char, ScheduleFormatEntry[]> parser,
             Func<ScheduleFormatEntry[], Parser<char, Unit>> check) =>
@@ -77,7 +84,7 @@ namespace TestApp
         private static Func<ScheduleFormatEntry[], Parser<char, Unit>> ValidateWildcards() =>
             entries =>
             {
-                if (entries.Length > 1 && entries.Any(x => x == new ScheduleFormatEntry(null, null, null)))
+                if (entries.Length > 1 && entries.Any(x => x == ScheduleFormatEntry.Always))
                 {
                     return Parser<char>.Fail<Unit>(
                         $"Cannot have more than one wildcard entry in schedule");
