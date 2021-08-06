@@ -7,7 +7,7 @@
 
     <PropertyGroup>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <WarningsAsErrors/>
+        <WarningsAsErrors />
     </PropertyGroup>
 
     <PropertyGroup>
@@ -26,7 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Pidgin" Version="2.5.0"/>
+        <PackageReference Include="Pidgin" Version="2.5.0" />
     </ItemGroup>
 
 </Project>

@@ -40,60 +40,65 @@ namespace TestApp
             select new ScheduleFormatEntry(interval.begin, interval.end, step);
 
         public static Parser<char, ScheduleFormatEntry[]> IntervalsSequenceParser { get; } =
-            Validate(WholeIntervalParser.SeparatedAndOptionallyTerminatedAtLeastOnce(Char(',')).Map(x => x.ToArray()), ValidateWildcards);
+            WholeIntervalParser.SeparatedAndOptionallyTerminatedAtLeastOnce(Char(',')).Map(x => x.ToArray())
+                .SelectMany(ValidateWildcards(), ((entries, _) => entries));
 
         public static Parser<char, ScheduleDate> DateParser { get; } =
-            from years in Validate(IntervalsSequenceParser, ValidateBounds("Year", 2000, 2100))
+            from years in Validate(IntervalsSequenceParser, ValidateBoundsParser("Year", 2000, 2100))
             from _ in Char('.')
-            from months in Validate(IntervalsSequenceParser, ValidateBounds("Month", 1, 12))
+            from months in Validate(IntervalsSequenceParser, ValidateBoundsParser("Month", 1, 12))
             from __ in Char('.')
-            from days in Validate(IntervalsSequenceParser, ValidateBounds("Day", 1, 32))
+            from days in Validate(IntervalsSequenceParser, ValidateBoundsParser("Day", 1, 32))
             select new ScheduleDate(years, months, days);
 
         public static Parser<char, ScheduleFormatEntry[]> DayOfWeekParser { get; } =
-            Validate(IntervalsSequenceParser, ValidateBounds("Day of week", 0, 6));
+            Validate(IntervalsSequenceParser, ValidateBoundsParser("Day of week", 0, 6));
 
         public static Parser<char, ScheduleTime> TimeParser { get; } =
-            from hours in Validate(IntervalsSequenceParser, ValidateBounds("Jour", 0, 23))
+            from hours in Validate(IntervalsSequenceParser, ValidateBoundsParser("Jour", 0, 23))
             from _ in Char(':')
-            from min in Validate(IntervalsSequenceParser, ValidateBounds("Min", 0, 59))
+            from min in Validate(IntervalsSequenceParser, ValidateBoundsParser("Min", 0, 59))
             from __ in Char(':')
-            from sec in Validate(IntervalsSequenceParser, ValidateBounds("Sec", 0, 59))
-            from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBounds("Millis", 0, 999))).Optional())
+            from sec in Validate(IntervalsSequenceParser, ValidateBoundsParser("Sec", 0, 59))
+            from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBoundsParser("Millis", 0, 999))).Optional())
                 .Map(MapMaybe)
             select new ScheduleTime(hours, min, sec, millis ?? new[] {new ScheduleFormatEntry(0, null, null)});
 
         public static Parser<char, ScheduleFormat> FullFormatParser { get; } =
-            from date in Try(DateParser.Optional()).Before(Char(' ')).Map(MapMaybe)
-            from dayOfWeek in Try(DayOfWeekParser.Optional().Before(Char(' '))).Map(MapMaybe)
+            from date in Try(DateParser).Before(Char(' ')).Optional().Map(MapMaybe)
+            from dayOfWeek in Try(DayOfWeekParser.Before(Char(' '))).Optional().Map(MapMaybe)
             from time in TimeParser
             select new ScheduleFormat(date, dayOfWeek, time);
+
+        private static Parser<char, ScheduleFormatEntry[]> Validate(Parser<char, ScheduleFormatEntry[]> parser,
+            Func<ScheduleFormatEntry[], Parser<char, Unit>> check) =>
+            parser.SelectMany(check, (entries, _) => entries);
+
+        private static Func<ScheduleFormatEntry[], Parser<char, Unit>> ValidateWildcards() =>
+            entries =>
+            {
+                if (entries.Length > 1 && entries.Any(x => x == new ScheduleFormatEntry(null, null, null)))
+                {
+                    return Parser<char>.Fail<Unit>(
+                        $"Cannot have more than one wildcard entry in schedule");
+                }
+                
+                return Parser<char>.Return(Unit.Value);
+            };
         
-        private static Parser<char, ScheduleFormatEntry[]> Validate(Parser<char, ScheduleFormatEntry[]> parser, Action<ScheduleFormatEntry[]> check) =>
-            parser.Map(x =>
-            {
-                check(x);
-                return x;
-            });
-
-        private static void ValidateWildcards(ScheduleFormatEntry[] entries)
-        {
-            if (entries.Length > 1 && entries.Any(x => x == new ScheduleFormatEntry(null, null, null)))
-            {
-                throw new ScheduleFormatException("Cannot have more than one wildcard entry in schedule");
-            }
-        }
-
-        private static Action<ScheduleFormatEntry[]> ValidateBounds(string formatPart, int min, int max) =>
+        private static Func<ScheduleFormatEntry[], Parser<char, Unit>> ValidateBoundsParser(string formatPart, int min, int max) =>
             entries =>
             {
                 foreach (var x in entries)
                 {
                     if (x.Begin < min || x.Begin > max || x.End < x.Begin || x.End > max)
                     {
-                        throw new ScheduleFormatException($"{formatPart} component ({x.Begin}, {x.End}) is out of bounds ({min}, {max})");
+                        return Parser<char>.Fail<Unit>(
+                            $"{formatPart} component ({x.Begin}, {x.End}) is out of bounds ({min}, {max})");
                     }
                 }
+
+                return Parser<char>.Return(Unit.Value);
             };
 
         private static T? MapMaybe<T>(Maybe<T> maybe) where T : class =>
