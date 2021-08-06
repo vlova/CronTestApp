@@ -1,7 +1,10 @@
 using System;
 using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using Pidgin;
+using static Pidgin.Parser;
+using static Pidgin.Parser<char>;
 
 namespace TestApp.Test
 {
@@ -34,6 +37,25 @@ namespace TestApp.Test
             Assert.ThrowsException<ParseException>(() => ParserHelper.IntervalParser.ParseOrThrow("1-"));
             Assert.ThrowsException<ParseException>(() => ParserHelper.IntervalParser.ParseOrThrow("-10"));
             Assert.ThrowsException<ParseException>(() => ParserHelper.IntervalParser.ParseOrThrow("1-a"));
+        }
+        
+        [TestMethod]
+        public void WholeInterval()
+        {
+            Assert.AreEqual(new ScheduleFormatEntry(0, null, null), ParserHelper.WholeIntervalParser.ParseOrThrow("0"));
+            Assert.AreEqual(new ScheduleFormatEntry(1, null, null), ParserHelper.WholeIntervalParser.ParseOrThrow("1"));
+            Assert.AreEqual(new ScheduleFormatEntry(1, 10, null), ParserHelper.WholeIntervalParser.ParseOrThrow("1-10"));
+            Assert.AreEqual(new ScheduleFormatEntry(null, null, null), ParserHelper.WholeIntervalParser.ParseOrThrow("*"));
+            Assert.AreEqual(new ScheduleFormatEntry(null, null, 24), ParserHelper.WholeIntervalParser.ParseOrThrow("*/24"));
+            Assert.AreEqual(new ScheduleFormatEntry(1, null, 24), ParserHelper.WholeIntervalParser.ParseOrThrow("1/24"));
+            Assert.AreEqual(new ScheduleFormatEntry(1, 15, 24), ParserHelper.WholeIntervalParser.ParseOrThrow("1-15/24"));
+            Assert.ThrowsException<ParseException>(() => ParserHelper.WholeIntervalParser.ParseOrThrow("aasg0"));
+            Assert.ThrowsException<ParseException>(() => ParserHelper.WholeIntervalParser.ParseOrThrow("1-"));
+            Assert.ThrowsException<ParseException>(() => ParserHelper.WholeIntervalParser.ParseOrThrow("-10"));
+            Assert.ThrowsException<ParseException>(() => ParserHelper.WholeIntervalParser.ParseOrThrow("1-a"));
+            Assert.ThrowsException<ParseException>(() => ParserHelper.WholeIntervalParser.ParseOrThrow("*/*"));
+            Assert.ThrowsException<ParseException>(() => ParserHelper.WholeIntervalParser.Then(End).ParseOrThrow("1-15-*/12"));
+            Assert.ThrowsException<ParseException>(() => ParserHelper.WholeIntervalParser.ParseOrThrow("-*/12"));
         }
 
         private static DateTime ParseTime(string timeStr)
