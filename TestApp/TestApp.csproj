@@ -19,4 +19,8 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="Pidgin" Version="2.5.0" />
+	</ItemGroup>
+
 </Project>
