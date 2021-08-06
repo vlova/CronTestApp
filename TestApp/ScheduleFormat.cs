@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace TestApp
 {
     public record ScheduleFormat(

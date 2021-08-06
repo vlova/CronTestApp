@@ -43,24 +43,24 @@ namespace TestApp
             Validate(WholeIntervalParser.SeparatedAndOptionallyTerminatedAtLeastOnce(Char(',')).Map(x => x.ToArray()), ValidateWildcards);
 
         public static Parser<char, ScheduleDate> DateParser { get; } =
-            from years in Validate(IntervalsSequenceParser, ValidateBounds(2000, 2100))
+            from years in Validate(IntervalsSequenceParser, ValidateBounds("Year", 2000, 2100))
             from _ in Char('.')
-            from months in Validate(IntervalsSequenceParser, ValidateBounds(1, 12))
+            from months in Validate(IntervalsSequenceParser, ValidateBounds("Month", 1, 12))
             from __ in Char('.')
-            from days in Validate(IntervalsSequenceParser, ValidateBounds(1, 32))
+            from days in Validate(IntervalsSequenceParser, ValidateBounds("Day", 1, 32))
             select new ScheduleDate(years, months, days);
 
         public static Parser<char, ScheduleFormatEntry[]> DayOfWeekParser { get; } =
-            Validate(IntervalsSequenceParser, ValidateBounds(0, 6));
+            Validate(IntervalsSequenceParser, ValidateBounds("Day of week", 0, 6));
 
         public static Parser<char, ScheduleTime> TimeParser { get; } =
-            from hours in Validate(IntervalsSequenceParser, ValidateBounds(0, 23))
+            from hours in Validate(IntervalsSequenceParser, ValidateBounds("Jour", 0, 23))
             from _ in Char(':')
-            from min in Validate(IntervalsSequenceParser, ValidateBounds(0, 59))
+            from min in Validate(IntervalsSequenceParser, ValidateBounds("Min", 0, 59))
             from __ in Char(':')
-            from sec in Validate(IntervalsSequenceParser, ValidateBounds(0, 59))
-            from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBounds(0, 999))).Optional())
-                .Map(x => x.HasValue ? x.GetValueOrDefault() : default)
+            from sec in Validate(IntervalsSequenceParser, ValidateBounds("Sec", 0, 59))
+            from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBounds("Millis", 0, 999))).Optional())
+                .Map(MapMaybe)
             select new ScheduleTime(hours, min, sec, millis ?? new[] {new ScheduleFormatEntry(0, null, null)});
 
         public static Parser<char, ScheduleFormat> FullFormatParser { get; } =
@@ -84,12 +84,15 @@ namespace TestApp
             }
         }
 
-        private static Action<ScheduleFormatEntry[]> ValidateBounds(int min, int max) =>
+        private static Action<ScheduleFormatEntry[]> ValidateBounds(string formatPart, int min, int max) =>
             entries =>
             {
-                if (entries.Any(x => x.Begin < min || x.Begin > max || x.End < x.Begin || x.End > max))
+                foreach (var x in entries)
                 {
-                    throw new ScheduleFormatException("Datetime component is out of bounds");
+                    if (x.Begin < min || x.Begin > max || x.End < x.Begin || x.End > max)
+                    {
+                        throw new ScheduleFormatException($"{formatPart} component ({x.Begin}, {x.End}) is out of bounds ({min}, {max})");
+                    }
                 }
             };
 

@@ -244,6 +244,21 @@ namespace TestApp.UnitTest
                         new[] {new ScheduleFormatEntry(0, null, null)}
                     )),
                 ParserHelper.FullFormatParser.ParseOrThrow("*.9.*/2 1-5 10:00:00.000"));
+            
+            
+            AssertEqualFormat(new ScheduleFormat(new ScheduleDate(
+                        new[] {new ScheduleFormatEntry(null, null, null)},
+                        new[] {new ScheduleFormatEntry(null, null, null)},
+                        new[] {new ScheduleFormatEntry(null, null, null)}
+                    ),
+                    new []{new ScheduleFormatEntry(1, 5, null)},
+                    new ScheduleTime(
+                        new[] {new ScheduleFormatEntry(10, null, null)},
+                        new[] {new ScheduleFormatEntry(0, null, null)},
+                        new[] {new ScheduleFormatEntry(0, null, null)},
+                        new[] {new ScheduleFormatEntry(0, null, null)}
+                    )),
+                ParserHelper.FullFormatParser.ParseOrThrow("1-5 10:00:00.000"));
         }
 
         private static void AssertEqualDates(ScheduleDate expected, ScheduleDate actual)
