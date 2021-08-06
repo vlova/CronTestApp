@@ -1,8 +1,5 @@
 using System;
-using System.Globalization;
-using System.Linq;
 using Pidgin;
-using static Pidgin.Parser;
 using static Pidgin.Parser<char>;
 using Xunit;
 
@@ -143,11 +140,68 @@ namespace TestApp.UnitTest
             Assert.Throws<ScheduleFormatException>(() => ParserHelper.DayOfWeekParser.ParseOrThrow("7"));
         }
 
+        [Fact]
+        public void Time()
+        {
+            AssertEqualTimes(new ScheduleTime(
+                    new[] {new ScheduleFormatEntry(10, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)}
+                ),
+                ParserHelper.TimeParser.ParseOrThrow("10:00:00.000"));
+            
+            AssertEqualTimes(new ScheduleTime(
+                    new[] {new ScheduleFormatEntry(10, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)}
+                ),
+                ParserHelper.TimeParser.ParseOrThrow("10:00:00"));
+            
+            AssertEqualTimes(new ScheduleTime(
+                    new[] {new ScheduleFormatEntry(null, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)}
+                ),
+                ParserHelper.TimeParser.ParseOrThrow("*:00:00"));
+            
+            AssertEqualTimes(new ScheduleTime(
+                    new[] {new ScheduleFormatEntry(null, null, null)},
+                    new[] {new ScheduleFormatEntry(null, null, null)},
+                    new[] {new ScheduleFormatEntry(null, null, null)},
+                    new[] {new ScheduleFormatEntry(0, null, null)}
+                ),
+                ParserHelper.TimeParser.ParseOrThrow("*:*:*"));
+            
+            AssertEqualTimes(new ScheduleTime(
+                    new[] {new ScheduleFormatEntry(null, null, null)},
+                    new[] {new ScheduleFormatEntry(null, null, null)},
+                    new[] {new ScheduleFormatEntry(null, null, null)},
+                    new[] {new ScheduleFormatEntry(null, null, null)}
+                ),
+                ParserHelper.TimeParser.ParseOrThrow("*:*:*.*"));
+            
+            Assert.Throws<ScheduleFormatException>(() => ParserHelper.TimeParser.ParseOrThrow("24:00:00.000"));
+            Assert.Throws<ScheduleFormatException>(() => ParserHelper.TimeParser.ParseOrThrow("00:60:00.000"));
+            Assert.Throws<ScheduleFormatException>(() => ParserHelper.TimeParser.ParseOrThrow("00:00:60.000"));
+            Assert.Throws<ScheduleFormatException>(() => ParserHelper.TimeParser.ParseOrThrow("00:00:00.1000"));
+        }
+
         private static void AssertEqualDates(ScheduleDate expected, ScheduleDate actual)
         {
             Assert.Equal(expected.Years, actual.Years);
             Assert.Equal(expected.Months, actual.Months);
             Assert.Equal(expected.Days, actual.Days);
+        }
+
+        private static void AssertEqualTimes(ScheduleTime expected, ScheduleTime actual)
+        {
+            Assert.Equal(expected.Hours, actual.Hours);
+            Assert.Equal(expected.Minutes, actual.Minutes);
+            Assert.Equal(expected.Seconds, actual.Seconds);
+            Assert.Equal(expected.Milliseconds, actual.Milliseconds);
         }
     }
 }
