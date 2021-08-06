@@ -28,7 +28,7 @@ namespace TestApp
         public static Parser<char, (int begin, int? end)> IntervalParser { get; } =
             from begin in NumberParser
             from end in Try(Char('-').Then(NumberParser).Optional())
-                .Map(x => x.HasValue ? x.GetValueOrDefault() : default(int?))
+                .Map(MapMaybeStruct)
             select (begin, end);
 
         public static Parser<char, ScheduleFormatEntry> WholeIntervalParser { get; } =
@@ -36,7 +36,7 @@ namespace TestApp
                 Try(Asterisk.Map(_ => (begin: default(int?), end: default(int?))))
                     .Or(IntervalParser.Map(x => ((int?) x.begin, x.end)))
             from step in Try(Char('/').Then(NumberParser).Optional())
-                .Map(x => x.HasValue ? x.GetValueOrDefault() : default(int?))
+                .Map(MapMaybeStruct)
             select new ScheduleFormatEntry(interval.begin, interval.end, step);
 
         public static Parser<char, ScheduleFormatEntry[]> IntervalsSequenceParser { get; } =
@@ -49,13 +49,9 @@ namespace TestApp
             from __ in Char('.')
             from days in Validate(IntervalsSequenceParser, ValidateBounds(1, 32))
             select new ScheduleDate(years, months, days);
-        
-        public static Parser<char, DayOfWeek> DayOfWeekParser { get; } =
-            from num in NumberParser
-            let x = Enum.IsDefined(typeof(DayOfWeek), num) 
-                ? (DayOfWeek) num 
-                : throw new ScheduleFormatException($"Cannot parse {num} as day of week")
-            select x;
+
+        public static Parser<char, ScheduleFormatEntry[]> DayOfWeekParser { get; } =
+            Validate(IntervalsSequenceParser, ValidateBounds(0, 6));
 
         public static Parser<char, ScheduleTime> TimeParser { get; } =
             from hours in Validate(IntervalsSequenceParser, ValidateBounds(0, 23))
@@ -66,6 +62,12 @@ namespace TestApp
             from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBounds(0, 999))).Optional())
                 .Map(x => x.HasValue ? x.GetValueOrDefault() : default)
             select new ScheduleTime(hours, min, sec, millis ?? new[] {new ScheduleFormatEntry(0, null, null)});
+
+        public static Parser<char, ScheduleFormat> FullFormatParser { get; } =
+            from date in Try(DateParser.Optional()).Before(Char(' ')).Map(MapMaybe)
+            from dayOfWeek in Try(DayOfWeekParser.Optional().Before(Char(' '))).Map(MapMaybe)
+            from time in TimeParser
+            select new ScheduleFormat(date, dayOfWeek, time);
         
         private static Parser<char, ScheduleFormatEntry[]> Validate(Parser<char, ScheduleFormatEntry[]> parser, Action<ScheduleFormatEntry[]> check) =>
             parser.Map(x =>
@@ -90,5 +92,11 @@ namespace TestApp
                     throw new ScheduleFormatException("Datetime component is out of bounds");
                 }
             };
+
+        private static T? MapMaybe<T>(Maybe<T> maybe) where T : class =>
+            maybe.HasValue ? maybe.GetValueOrDefault() : null;
+        
+        private static T? MapMaybeStruct<T>(Maybe<T> maybe) where T : struct =>
+            maybe.HasValue ? maybe.GetValueOrDefault() : null;
     }
 }

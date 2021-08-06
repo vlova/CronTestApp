@@ -1,10 +1,10 @@
-using System;
+#nullable enable
 
 namespace TestApp
 {
     public record ScheduleFormat(
         ScheduleDate Date,
-        DayOfWeek DayOfWeek,
+        ScheduleFormatEntry[] DayOfWeek,
         ScheduleTime Time);
     
     public record ScheduleDate(
