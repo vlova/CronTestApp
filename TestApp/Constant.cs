@@ -8,6 +8,8 @@ namespace TestApp
         public const int MaxMonth = 12;
         public const int MinDay = 1;
         public const int MaxDay = 32;
+        public const int MinDayOfWeek = 0;
+        public const int MaxDayOfWeek = 6;
         public const int MinHour = 0;
         public const int MaxHour = 23;
         public const int MinMinute = 0;

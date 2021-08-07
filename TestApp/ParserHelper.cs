@@ -52,7 +52,7 @@ namespace TestApp
             select new ScheduleDate(years, months, days);
 
         public static Parser<char, ScheduleFormatEntry[]> DayOfWeekParser { get; } =
-            Validate(IntervalsSequenceParser, ValidateBoundsParser("Day of week", 0, 6));
+            Validate(IntervalsSequenceParser, ValidateBoundsParser("Day of week", Constant.MinDayOfWeek, Constant.MaxDayOfWeek));
 
         public static Parser<char, ScheduleTime> TimeParser { get; } =
             from hours in Validate(IntervalsSequenceParser, ValidateBoundsParser("Hour", Constant.MinHour, Constant.MaxHour))

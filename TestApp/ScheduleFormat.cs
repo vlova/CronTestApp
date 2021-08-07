@@ -25,12 +25,21 @@ namespace TestApp
         ScheduleInterval DayOfWeek,
         ScheduleInterval Hours,
         ScheduleInterval Minutes,
-        ScheduleInterval Seconds)
+        ScheduleInterval Seconds,
+        ScheduleInterval Milliseconds)
     {
         public static MergedSchedule FromFormat(ScheduleFormat format)
         {
-            return new MergedSchedule(GetMerged(format.Date.Years, Constant.MinYear, Constant.MaxYear), 
-                default!, default!, default!, default!, default!, default!);
+            return new(
+                GetMerged(format.Date.Years, Constant.MinYear, Constant.MaxYear), 
+                GetMerged(format.Date.Months, Constant.MinMonth, Constant.MaxMonth), 
+                GetMerged(format.Date.Days, Constant.MinDay, Constant.MaxDay), 
+                GetMerged(format.DayOfWeek, Constant.MinDayOfWeek, Constant.MaxDayOfWeek), 
+                GetMerged(format.Time.Hours, Constant.MinHour, Constant.MaxHour), 
+                GetMerged(format.Time.Minutes, Constant.MinMinute, Constant.MaxMinute), 
+                GetMerged(format.Time.Seconds, Constant.MinSec, Constant.MaxSec),
+                GetMerged(format.Time.Milliseconds, Constant.MinMillis, Constant.MaxMillis)
+                );
         }
 
         private static ScheduleInterval GetMerged(ScheduleFormatEntry[] intervals, int begin, int end)
