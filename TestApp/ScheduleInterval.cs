@@ -1,6 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace TestApp
 {
@@ -18,7 +18,9 @@ namespace TestApp
             _allowedPoints = new bool[end - begin + 1];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public bool IsPointAllowed(int point) => _allowedPoints[point - Begin];
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public bool ChangePointAllowance(int point, bool value) => _allowedPoints[point - Begin] = value;
 
         public static ScheduleInterval CreateAllowedInterval(int begin, int end)
