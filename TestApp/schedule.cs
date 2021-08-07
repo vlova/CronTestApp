@@ -218,7 +218,7 @@ namespace TestApp
 					{
 						var isLastDayInMonth = t1.Day == DateTime.DaysInMonth (t1.Year, t1.Month);
 						// 32-й день означает последнее число месяца
-						if (((_days[t1.Day - 1] > 0) || (isLastDayInMonth && (_days[31] > 0))) && (_weekDays[(int)t1.DayOfWeek] > 0))
+						if ((_days[t1.Day - 1] > 0 || (isLastDayInMonth && _days[31] > 0)) && _weekDays[(int)t1.DayOfWeek] > 0)
 						{
 							if (_hours[t1.Hour] > 0)
 							{

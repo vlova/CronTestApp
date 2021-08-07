@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using Pidgin;
 
 namespace TestApp
@@ -11,8 +14,8 @@ namespace TestApp
         /// Создает пустой экземпляр, который будет соответствовать
         /// расписанию типа "*.*.* * *:*:*.*" (раз в 1 мс).
         /// </summary>
-        public NewSchedule ()
-            : this ("*.*.* * *:*:*.*")
+        public NewSchedule()
+            : this("*.*.* * *:*:*.*")
         {
         }
 
@@ -59,7 +62,7 @@ namespace TestApp
             var format = ParserHelper.FullFormatParser.ParseOrThrow(scheduleString);
             _innerSchedule = MergedSchedule.FromFormat(format);
         }
-        
+
         /// <summary>
         /// Возвращает следующий ближайший к заданному времени момент в расписании или
         /// само заданное время, если оно есть в расписании.
@@ -68,7 +71,87 @@ namespace TestApp
         /// <returns>Ближайший момент времени в расписании</returns>
         public DateTime NearestEvent(DateTime t1)
         {
-            throw new NotImplementedException();
+            while (true)
+            {
+                LoopStart: ;
+                // search for year
+                while (!_innerSchedule.Years.IsPointAllowed(t1.Year))
+                {
+                    t1 = new DateTime(t1.Year, 1, 1).AddYears(1);
+                }
+
+                // search for month
+                var year = t1.Year;
+                while (!_innerSchedule.Months.IsPointAllowed(t1.Month))
+                {
+                    t1 = new DateTime(t1.Year, t1.Month, 1).AddMonths(1);
+                    if (t1.Year != year)
+                    {
+                        goto LoopStart;
+                    }
+                }
+
+                // search for day
+                var month = t1.Month;
+                while (!(_innerSchedule.DayOfWeek.IsPointAllowed((int) t1.DayOfWeek)
+                         && (_innerSchedule.Days.IsPointAllowed(t1.Day) ||
+                             _innerSchedule.Days.IsPointAllowed(32)
+                             && t1.Day == DateTime.DaysInMonth(t1.Year, t1.Month))))
+                {
+
+                    t1 = new DateTime(t1.Year, t1.Month, t1.Day).AddDays(1);
+                    if (t1.Month != month)
+                    {
+                        goto LoopStart;
+                    }
+                }
+                
+                // search for hour
+                var day = t1.Day;
+                while (!_innerSchedule.Hours.IsPointAllowed(t1.Hour))
+                {
+                    t1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0).AddHours(1);
+                    if (t1.Day != day)
+                    {
+                        goto LoopStart;
+                    }
+                }
+                
+                // search for minute
+                var hour = t1.Hour;
+                while (!_innerSchedule.Minutes.IsPointAllowed(t1.Minute))
+                {
+                    t1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0).AddMinutes(1);
+                    if (t1.Hour != hour)
+                    {
+                        goto LoopStart;
+                    }
+                }
+                
+                // search for second
+                var minute = t1.Minute;
+                while (!_innerSchedule.Seconds.IsPointAllowed(t1.Second))
+                {
+                    t1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, t1.Second).AddSeconds(1);
+                    if (t1.Minute != minute)
+                    {
+                        goto LoopStart;
+                    }
+                }
+                
+                // search for second
+                var second = t1.Second;
+                while (!_innerSchedule.Milliseconds.IsPointAllowed(t1.Millisecond))
+                {
+                    t1 = t1.AddMilliseconds(1);
+                    if (t1.Second != second)
+                    {
+                        goto LoopStart;
+                    }
+                }
+
+                return t1;
+            }
         }
 
         /// <summary>
@@ -87,19 +170,13 @@ namespace TestApp
         /// </summary>
         /// <param name="t1">Время, от которого нужно отступить</param>
         /// <returns>Следующий момент времени в расписании</returns>
-        public DateTime NextEvent(DateTime t1)
-        {
-            throw new NotImplementedException();
-        }
+        public DateTime NextEvent(DateTime t1) => NearestEvent(t1.AddMilliseconds(1));
 
         /// <summary>
         /// Возвращает предыдущий момент времени в расписании.
         /// </summary>
         /// <param name="t1">Время, от которого нужно отступить</param>
         /// <returns>Предыдущий момент времени в расписании</returns>
-        public DateTime PrevEvent(DateTime t1)
-        {
-            throw new NotImplementedException();
-        }
+        public DateTime PrevEvent(DateTime t1) => NearestPrevEvent(t1.AddMilliseconds(-1));
     }
 }
