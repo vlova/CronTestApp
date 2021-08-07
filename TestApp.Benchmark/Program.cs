@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
 namespace TestApp.Benchmark
@@ -8,49 +10,82 @@ namespace TestApp.Benchmark
 	{
 		static void Main (string[] args)
 		{
-			var summary = BenchmarkRunner.Run<MyTest> ();
+			BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 		}
 	}
 
-	public class MyTest
+	[SimpleJob(RuntimeMoniker.Net50)]
+	public class ParsingBench
 	{
-		[Benchmark]
-		public double AnyMoment ()
+		[Params("*.9.*/2 1-5 10:00:00.000", "*.4.6,7 * *:*:*.1,2,3-5,10-20/3", "2100.12.31 23:59:59.999", "*.*.1 0:0:0")]
+		public string Pattern = null!;
+		
+		[Benchmark(Baseline = true)]
+		public object ParsingOld ()
 		{
-			return TestMethod ("*.*.* * *:*:*.*");
+			return new Schedule(Pattern);
 		}
 
 		[Benchmark]
-		public double HourStart ()
+		public object ParsingNew ()
 		{
-			return TestMethod ("*.*.* *:0:0");
+			return new NewSchedule(Pattern);
 		}
+	}
+	
+	[SimpleJob(RuntimeMoniker.Net50)]
+	public class FindNextBench
+	{
+		[Params("*.9.*/2 1-5 10:00:00.000", "*.4.6,7 * *:*:*.1,2,3-5,10-20/3", "2100.12.31 23:59:59.999", "*.*.1 0:0:0")]
+		public string Pattern = null!;
+		
+		[Params("2001-01-01", "2080-05-05")]
+		public string DateString = null!;
+
+		private DateTime Date;
+		private Schedule OldSchedule = null!;
+		private NewSchedule NewSchedule = null!;
+		
+		[GlobalSetup]
+		public void Setup()
+		{
+			Date = DateTime.ParseExact(DateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+			OldSchedule = new Schedule(Pattern);
+			NewSchedule = new NewSchedule(Pattern);
+		}
+		
+		[Benchmark(Baseline = true)]
+		public object FindNextOld () => OldSchedule.NextEvent(Date);
 
 		[Benchmark]
-		public double DayStart ()
+		public object FindNextNew () => NewSchedule.NextEvent(Date);
+	}
+	
+	[SimpleJob(RuntimeMoniker.Net50)]
+	public class FindPrevBench
+	{
+		[Params("*.9.*/2 1-5 10:00:00.000", "*.4.6,7 * *:*:*.1,2,3-5,10-20/3", "2000.12.31 23:59:59.999", "*.*.1 0:0:0")]
+		public string Pattern = null!;
+		
+		[Params("2001-01-01", "2080-05-05")]
+		public string DateString = null!;
+
+		private DateTime Date;
+		private Schedule OldSchedule = null!;
+		private NewSchedule NewSchedule = null!;
+		
+		[GlobalSetup]
+		public void Setup()
 		{
-			return TestMethod ("*.*.* 0:0:0");
+			Date = DateTime.ParseExact(DateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+			OldSchedule = new Schedule(Pattern);
+			NewSchedule = new NewSchedule(Pattern);
 		}
+		
+		[Benchmark(Baseline = true)]
+		public object FindPrevOld () => OldSchedule.PrevEvent(Date);
 
 		[Benchmark]
-		public double MonthStart ()
-		{
-			return TestMethod ("*.*.1 0:0:0");
-		}
-
-		private double TestMethod (string scheduleStr)
-		{
-			var schedule = new Schedule (scheduleStr);
-			var minDate = new DateTime (2020, 12, 15);
-			var maxDate = new DateTime (2021, 1, 15);
-			double result = 0;
-			for (var time = minDate; time < maxDate; time = time.AddMilliseconds (12345))
-			{
-				var nextTime = schedule.NextEvent (time);
-				var lastTime = schedule.PrevEvent (time);
-				result += (nextTime - lastTime).TotalMilliseconds;
-			}
-			return result;
-		}
+		public object FindPrevNew () => NewSchedule.PrevEvent(Date);
 	}
 }
