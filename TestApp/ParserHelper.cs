@@ -44,23 +44,23 @@ namespace TestApp
                 .SelectMany(ValidateWildcards(), ((entries, _) => entries));
 
         public static Parser<char, ScheduleDate> DateParser { get; } =
-            from years in Validate(IntervalsSequenceParser, ValidateBoundsParser("Year", 2000, 2100))
+            from years in Validate(IntervalsSequenceParser, ValidateBoundsParser("Year", Constant.MinYear, Constant.MaxYear))
             from _ in Char('.')
-            from months in Validate(IntervalsSequenceParser, ValidateBoundsParser("Month", 1, 12))
+            from months in Validate(IntervalsSequenceParser, ValidateBoundsParser("Month", Constant.MinMonth, Constant.MaxMonth))
             from __ in Char('.')
-            from days in Validate(IntervalsSequenceParser, ValidateBoundsParser("Day", 1, 32))
+            from days in Validate(IntervalsSequenceParser, ValidateBoundsParser("Day", Constant.MinDay, Constant.MaxDay))
             select new ScheduleDate(years, months, days);
 
         public static Parser<char, ScheduleFormatEntry[]> DayOfWeekParser { get; } =
             Validate(IntervalsSequenceParser, ValidateBoundsParser("Day of week", 0, 6));
 
         public static Parser<char, ScheduleTime> TimeParser { get; } =
-            from hours in Validate(IntervalsSequenceParser, ValidateBoundsParser("Jour", 0, 23))
+            from hours in Validate(IntervalsSequenceParser, ValidateBoundsParser("Hour", Constant.MinHour, Constant.MaxHour))
             from _ in Char(':')
-            from min in Validate(IntervalsSequenceParser, ValidateBoundsParser("Min", 0, 59))
+            from min in Validate(IntervalsSequenceParser, ValidateBoundsParser("Min", Constant.MinMinute, Constant.MaxMinute))
             from __ in Char(':')
-            from sec in Validate(IntervalsSequenceParser, ValidateBoundsParser("Sec", 0, 59))
-            from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBoundsParser("Millis", 0, 999))).Optional())
+            from sec in Validate(IntervalsSequenceParser, ValidateBoundsParser("Sec", Constant.MinSec, Constant.MaxSec))
+            from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBoundsParser("Millis", Constant.MinMillis, Constant.MaxMillis))).Optional())
                 .Map(MapMaybe)
             select new ScheduleTime(hours, min, sec, millis ?? new[] {ScheduleFormatEntry.SinglePoint(0)});
 
