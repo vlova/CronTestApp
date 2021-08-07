@@ -1,132 +1,110 @@
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using System;
+using System.Globalization;
 using Xunit;
 
 namespace TestApp.UnitTest
 {
-    public class ScheduleTests
-    {
-        [Fact]
-        public void SinglePoint()
-        {
-            var format = new ScheduleFormat(new ScheduleDate(
-                    new[] {ScheduleFormatEntry.SinglePoint(2020)},
-                    new[] {ScheduleFormatEntry.SinglePoint(9)},
-                    new[] {ScheduleFormatEntry.SinglePoint(1)}
-                ),
-                new[] {ScheduleFormatEntry.SinglePoint(1)},
-                new ScheduleTime(
-                    new[] {ScheduleFormatEntry.SinglePoint(10)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)}
-                ));
-            var merged = MergedSchedule.FromFormat(format);
-            AssertSingleValidPoint(merged.Years, 2020);
-            AssertSingleValidPoint(merged.Months, 9);
-            AssertSingleValidPoint(merged.Days, 1);
-            AssertSingleValidPoint(merged.DayOfWeek, 1);
-            AssertSingleValidPoint(merged.Hours, 10);
-            AssertSingleValidPoint(merged.Minutes, 0);
-            AssertSingleValidPoint(merged.Seconds, 0);
-            AssertSingleValidPoint(merged.Milliseconds, 0);
-        }
-        
-        [Fact]
-        public void Asterisk()
-        {
-            var format = new ScheduleFormat(new ScheduleDate(
-                    new[] {ScheduleFormatEntry.Always},
-                    new[] {ScheduleFormatEntry.SinglePoint(9)},
-                    new[] {ScheduleFormatEntry.SinglePoint(1)}
-                ),
-                new[] {ScheduleFormatEntry.SinglePoint(1)},
-                new ScheduleTime(
-                    new[] {ScheduleFormatEntry.SinglePoint(10)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)}
-                ));
-            var merged = MergedSchedule.FromFormat(format);
-            AssertOnlyValidPoints(merged.Years,
-                Enumerable.Range(Constant.MinYear, Constant.MaxYear - Constant.MinYear + 1).ToHashSet());
-            AssertSingleValidPoint(merged.Months, 9);
-            AssertSingleValidPoint(merged.Days, 1);
-            AssertSingleValidPoint(merged.DayOfWeek, 1);
-            AssertSingleValidPoint(merged.Hours, 10);
-            AssertSingleValidPoint(merged.Minutes, 0);
-            AssertSingleValidPoint(merged.Seconds, 0);
-            AssertSingleValidPoint(merged.Milliseconds, 0);
-        }
-        
-        [Fact]
-        public void Range()
-        {
-            var format = new ScheduleFormat(new ScheduleDate(
-                    new[] {new ScheduleFormatEntry(2000, 2050, null)},
-                    new[] {ScheduleFormatEntry.SinglePoint(9)},
-                    new[] {ScheduleFormatEntry.SinglePoint(1)}
-                ),
-                new[] {ScheduleFormatEntry.SinglePoint(1)},
-                new ScheduleTime(
-                    new[] {ScheduleFormatEntry.SinglePoint(10)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)}
-                ));
-            var merged = MergedSchedule.FromFormat(format);
-            AssertOnlyValidPoints(merged.Years,
-                Enumerable.Range(2000, 51).ToHashSet());
-            AssertSingleValidPoint(merged.Months, 9);
-            AssertSingleValidPoint(merged.Days, 1);
-            AssertSingleValidPoint(merged.DayOfWeek, 1);
-            AssertSingleValidPoint(merged.Hours, 10);
-            AssertSingleValidPoint(merged.Minutes, 0);
-            AssertSingleValidPoint(merged.Seconds, 0);
-            AssertSingleValidPoint(merged.Milliseconds, 0);
-        }     
-        
-        [Fact]
-        public void RangeWithStep()
-        {
-            var format = new ScheduleFormat(new ScheduleDate(
-                    new[] {new ScheduleFormatEntry(2000, 2050, 3)},
-                    new[] {ScheduleFormatEntry.SinglePoint(9)},
-                    new[] {ScheduleFormatEntry.SinglePoint(1)}
-                ),
-                new[] {ScheduleFormatEntry.SinglePoint(1)},
-                new ScheduleTime(
-                    new[] {ScheduleFormatEntry.SinglePoint(10)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)},
-                    new[] {ScheduleFormatEntry.SinglePoint(0)}
-                ));
-            var merged = MergedSchedule.FromFormat(format);
-            AssertOnlyValidPoints(merged.Years,
-                Enumerable.Range(2000, 51).Where(x => (x-2000)%3==0).ToHashSet());
-            AssertSingleValidPoint(merged.Months, 9);
-            AssertSingleValidPoint(merged.Days, 1);
-            AssertSingleValidPoint(merged.DayOfWeek, 1);
-            AssertSingleValidPoint(merged.Hours, 10);
-            AssertSingleValidPoint(merged.Minutes, 0);
-            AssertSingleValidPoint(merged.Seconds, 0);
-            AssertSingleValidPoint(merged.Milliseconds, 0);
-        }
-        
-        [SuppressMessage("ReSharper", "ParameterOnlyUsedForPreconditionCheck.Local")]
-        private void AssertSingleValidPoint(ScheduleInterval interval, int point)
-        {
-            AssertOnlyValidPoints(interval, new HashSet<int> {point});
-        }
-        
-        [SuppressMessage("ReSharper", "ParameterOnlyUsedForPreconditionCheck.Local")]
-        private void AssertOnlyValidPoints(ScheduleInterval interval, HashSet<int> validPoints)
-        {
-            foreach (var (p, isAllowed) in interval)
-            {
-                Assert.True(isAllowed == validPoints.Contains(p), $"Point {p} is {(isAllowed ? "allowed" : "disallowed")} when it shouldn't");
-            }
-        }
-    }
+	public class ScheduleTests
+	{
+		[Theory]
+		[InlineData ("2100.12.31 23:59:59.999", "2000-01-01 00:00:00.000", "2100-12-31 23:59:59.999")] // макс. количество итераций при проверке
+		[InlineData ("*.*.* * *:*:*.*", "2000-01-01 00:00:00.001", "2000-01-01 00:00:00.001")] // "*.*.* * *:*:*.*" (раз в 1 мс)
+		[InlineData ("*.*.* * *:*:*.*", "2100-12-31 23:59:59.999", "2100-12-31 23:59:59.999")]
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-02 00:00:00.500", "2021-08-02 00:00:00.500")] // 1,2,3-5,10-20/3 означает список 1,2,3,4,5,10,13,16,19
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-05 00:00:00.500", "2021-08-06 00:00:00.000")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2020-01-01 00:00:00.011", "2020-01-01 00:00:00.013")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2020-12-31 23:59:59.020", "2021-01-01 00:00:00.001")]
+		[InlineData ("*.*.* * */4:*:*", "2020-01-01 00:00:00.000", "2020-01-01 00:00:00.000")] // (для часов) */4 означает 0,4,8,12,16,20
+		[InlineData ("*.*.* * */4:*:*", "2020-12-31 21:00:00.000", "2021-01-01 00:00:00.000")]
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2020-09-03 10:00:00.000", "2020-09-03 10:00:00.000")] // *.9.*/2 1-5 10:00:00.000 означает 10:00 во все дни с пн. по пт. по нечетным числам в сентябре
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2020-09-30 12:00:00.000", "2021-09-01 10:00:00.000")]
+		[InlineData ("*:00:00", "2020-01-01 00:00:00.000", "2020-01-01 00:00:00.000")] // *:00:00 означает начало любого часа
+		[InlineData ("*:00:00", "2020-12-31 23:59:59.999", "2021-01-01 00:00:00.000")]
+		[InlineData ("*.*.01 01:30:00", "2020-01-01 01:30:00.000", "2020-01-01 01:30:00.000")] // *.*.01 01:30:00 означает 01:30 по первым числам каждого месяца
+		[InlineData ("*.*.01 01:30:00", "2020-12-31 01:30:00.001", "2021-01-01 01:30:00.000")]
+		[InlineData ("*.*.32 12:00:00", "2020-01-31 12:00:00.000", "2020-01-31 12:00:00.000")] // 32-й день означает последнее число месяца
+		[InlineData ("*.*.32 12:00:00", "2020-01-31 12:00:00.001", "2020-02-29 12:00:00.000")]
+		public void NearestEvent (string scheduleString, string time, string expectedResult)
+		{
+			var schedule = new Schedule (scheduleString);
+			Assert.Equal(ParseTime (expectedResult), schedule.NearestEvent (ParseTime (time)));
+		}
+
+		[Theory]
+		[InlineData ("2100.12.31 23:59:59.999", "2000-01-01 00:00:00.000", "2100-12-31 23:59:59.999")] // макс. количество итераций при проверке
+		[InlineData ("*.*.* * *:*:*.*", "2000-01-01 00:00:00.001", "2000-01-01 00:00:00.002")] // "*.*.* * *:*:*.*" (раз в 1 мс)
+		[InlineData ("*.*.* * *:*:*.*", "2100-12-31 23:59:59.998", "2100-12-31 23:59:59.999")]
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-02 23:59:59.999", "2021-08-04 00:00:00.000")] // 1,2,3-5,10-20/3 означает список 1,2,3,4,5,10,13,16,19
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-05 00:00:00.500", "2021-08-06 00:00:00.000")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2020-01-01 00:00:00.011", "2020-01-01 00:00:00.013")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2020-12-31 23:59:59.020", "2021-01-01 00:00:00.001")]
+		[InlineData ("*.*.* * */4:*:*", "2020-01-01 00:00:00.000", "2020-01-01 00:00:01.000")] // (для часов) */4 означает 0,4,8,12,16,20
+		[InlineData ("*.*.* * */4:*:*", "2020-12-31 21:00:00.000", "2021-01-01 00:00:00.000")]
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2020-09-03 00:00:00.000", "2020-09-03 10:00:00.000")] // *.9.*/2 1-5 10:00:00.000 означает 10:00 во все дни с пн. по пт. по нечетным числам в сентябре
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2020-09-30 12:00:00.000", "2021-09-01 10:00:00.000")]
+		[InlineData ("*:00:00", "2020-01-01 00:00:00.000", "2020-01-01 01:00:00.000")] // *:00:00 означает начало любого часа
+		[InlineData ("*:00:00", "2020-12-31 23:59:59.999", "2021-01-01 00:00:00.000")]
+		[InlineData ("*.*.01 01:30:00", "2020-01-01 01:00:00.000", "2020-01-01 01:30:00.000")] // *.*.01 01:30:00 означает 01:30 по первым числам каждого месяца
+		[InlineData ("*.*.01 01:30:00", "2020-12-31 01:30:00.000", "2021-01-01 01:30:00.000")]
+		[InlineData ("*.*.32 12:00:00", "2020-01-31 11:00:00.000", "2020-01-31 12:00:00.000")] // 32-й день означает последнее число месяца
+		[InlineData ("*.*.32 12:00:00", "2020-01-31 12:00:00.000", "2020-02-29 12:00:00.000")]
+		public void NextEvent (string scheduleString, string time, string expectedResult)
+		{
+			var schedule = new Schedule (scheduleString);
+			Assert.Equal (ParseTime (expectedResult), schedule.NextEvent (ParseTime (time)));
+		}
+
+		[Theory]
+		[InlineData ("2000.01.01 00:00:00.000", "2100-12-31 23:59:59.999", "2000-01-01 00:00:00.000")] // макс. количество итераций при проверке
+		[InlineData ("*.*.* * *:*:*.*", "2000-01-01 00:00:00.001", "2000-01-01 00:00:00.001")] // "*.*.* * *:*:*.*" (раз в 1 мс)
+		[InlineData ("*.*.* * *:*:*.*", "2100-12-31 23:59:59.999", "2100-12-31 23:59:59.999")]
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-02 00:00:00.500", "2021-08-02 00:00:00.500")] // 1,2,3-5,10-20/3 означает список 1,2,3,4,5,10,13,16,19
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-05 00:00:00.500", "2021-08-04 23:59:59.999")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2020-01-01 00:00:00.013", "2020-01-01 00:00:00.013")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2021-01-01 00:00:00.000", "2020-12-31 23:59:59.019")]
+		[InlineData ("*.*.* * */4:*:*", "2020-01-01 00:00:00.000", "2020-01-01 00:00:00.000")] // (для часов) */4 означает 0,4,8,12,16,20
+		[InlineData ("*.*.* * */4:*:*", "2021-01-01 05:50:00.000", "2021-01-01 04:59:59.000")]
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2020-09-03 10:00:00.000", "2020-09-03 10:00:00.000")] // *.9.*/2 1-5 10:00:00.000 означает 10:00 во все дни с пн. по пт. по нечетным числам в сентябре
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2021-09-01 09:59:59.999", "2020-09-29 10:00:00.000")]
+		[InlineData ("*:00:00", "2020-01-01 00:00:00.000", "2020-01-01 00:00:00.000")] // *:00:00 означает начало любого часа
+		[InlineData ("*:00:00", "2021-01-01 23:59:59.999", "2021-01-01 23:00:00.000")]
+		[InlineData ("*.*.01 01:30:00", "2020-01-01 01:30:00.000", "2020-01-01 01:30:00.000")] // *.*.01 01:30:00 означает 01:30 по первым числам каждого месяца
+		[InlineData ("*.*.01 01:30:00", "2021-01-01 01:29:59.999", "2020-12-01 01:30:00.000")]
+		[InlineData ("*.*.32 12:00:00", "2020-01-31 12:00:00.000", "2020-01-31 12:00:00.000")] // 32-й день означает последнее число месяца
+		[InlineData ("*.*.32 12:00:00", "2020-03-29 00:00:00.000", "2020-02-29 12:00:00.000")]
+		public void NearestPrevEvent (string scheduleString, string time, string expectedResult)
+		{
+			var schedule = new Schedule (scheduleString);
+			Assert.Equal (ParseTime (expectedResult), schedule.NearestPrevEvent (ParseTime (time)));
+		}
+		
+		[Theory]
+		[InlineData ("2000.01.01 00:00:00.000", "2100-12-31 23:59:59.999", "2000-01-01 00:00:00.000")] // макс. количество итераций при проверке
+		[InlineData ("*.*.* * *:*:*.*", "2000-01-01 00:00:00.001", "2000-01-01 00:00:00.000")] // "*.*.* * *:*:*.*" (раз в 1 мс)
+		[InlineData ("*.*.* * *:*:*.*", "2021-01-01 00:00:00.000", "2020-12-31 23:59:59.999")]
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-04 00:00:00.000", "2021-08-02 23:59:59.999")] // 1,2,3-5,10-20/3 означает список 1,2,3,4,5,10,13,16,19
+		[InlineData ("*.*.* 1,3,5 *:*:*.*", "2021-08-05 00:00:00.500", "2021-08-04 23:59:59.999")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2020-01-01 00:00:00.013", "2020-01-01 00:00:00.010")]
+		[InlineData ("*.*.* * *:*:*.1,2,3-5,10-20/3", "2021-01-01 00:00:00.000", "2020-12-31 23:59:59.019")]
+		[InlineData ("*.*.* * */4:*:*", "2021-01-01 00:00:00.000", "2020-12-31 20:59:59.000")] // (для часов) */4 означает 0,4,8,12,16,20
+		[InlineData ("*.*.* * */4:*:*", "2021-01-01 05:50:00.000", "2021-01-01 04:59:59.000")]
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2020-09-01 10:00:00.000", "2019-09-27 10:00:00.000")] // *.9.*/2 1-5 10:00:00.000 означает 10:00 во все дни с пн. по пт. по нечетным числам в сентябре
+		[InlineData ("*.9.*/2 1-5 10:00:00.000", "2021-09-01 09:59:59.999", "2020-09-29 10:00:00.000")]
+		[InlineData ("*:00:00", "2020-01-01 00:00:00.000", "2019-12-31 23:00:00.000")] // *:00:00 означает начало любого часа
+		[InlineData ("*:00:00", "2021-01-01 23:59:59.999", "2021-01-01 23:00:00.000")]
+		[InlineData ("*.*.01 01:30:00", "2020-01-01 01:30:00.000", "2019-12-01 01:30:00.000")] // *.*.01 01:30:00 означает 01:30 по первым числам каждого месяца
+		[InlineData ("*.*.01 01:30:00", "2021-01-01 01:29:59.999", "2020-12-01 01:30:00.000")]
+		[InlineData ("*.*.32 12:00:00", "2021-03-31 12:00:00.000", "2021-02-28 12:00:00.000")] // 32-й день означает последнее число месяца
+		[InlineData ("*.*.32 12:00:00", "2020-03-29 00:00:00.000", "2020-02-29 12:00:00.000")]
+		public void PrevEvent (string scheduleString, string time, string expectedResult)
+		{
+			var schedule = new Schedule (scheduleString);
+			Assert.Equal (ParseTime (expectedResult), schedule.PrevEvent (ParseTime (time)));
+		}
+
+		private static DateTime ParseTime (string timeStr)
+		{
+			return DateTime.ParseExact (timeStr, "yyyy-MM-dd H:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None);
+		}
+	}
 }
