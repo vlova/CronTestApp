@@ -68,20 +68,27 @@ namespace TestApp
         /// <returns>Ближайший момент времени в расписании</returns>
         public DateTime NearestEvent(DateTime t1)
         {
+            var yearChanger = default(YearsChanger);
+            var monthChanger = default(MonthChanger);
+            var dayChanger = default(DayChanger);
+            var hourChanger = default(HourChanger);
+            var minuteChanger = default(MinuteChanger);
+            var secondChanger = default(SecondChanger);
+            var millisecondChanger = default(MillisecondChanger);
             while (true)
             {
                 LoopStart: ;
                 // search for year
                 while (!_innerSchedule.Years.IsPointAllowed(t1.Year))
                 {
-                    t1 = new DateTime(t1.Year, 1, 1).AddYears(1);
+                    t1 = yearChanger.Change<TrueType>(t1);
                 }
 
                 // search for month
                 var year = t1.Year;
                 while (!_innerSchedule.Months.IsPointAllowed(t1.Month))
                 {
-                    t1 = new DateTime(t1.Year, t1.Month, 1).AddMonths(1);
+                    t1 = monthChanger.Change<TrueType>(t1);
                     if (t1.Year != year)
                     {
                         goto LoopStart;
@@ -96,7 +103,7 @@ namespace TestApp
                              && t1.Day == DateTime.DaysInMonth(t1.Year, t1.Month))))
                 {
 
-                    t1 = new DateTime(t1.Year, t1.Month, t1.Day).AddDays(1);
+                    t1 = dayChanger.Change<TrueType>(t1);
                     if (t1.Month != month)
                     {
                         goto LoopStart;
@@ -107,7 +114,7 @@ namespace TestApp
                 var day = t1.Day;
                 while (!_innerSchedule.Hours.IsPointAllowed(t1.Hour))
                 {
-                    t1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0).AddHours(1);
+                    t1 = hourChanger.Change<TrueType>(t1);
                     if (t1.Day != day)
                     {
                         goto LoopStart;
@@ -118,7 +125,7 @@ namespace TestApp
                 var hour = t1.Hour;
                 while (!_innerSchedule.Minutes.IsPointAllowed(t1.Minute))
                 {
-                    t1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0).AddMinutes(1);
+                    t1 = minuteChanger.Change<TrueType>(t1);
                     if (t1.Hour != hour)
                     {
                         goto LoopStart;
@@ -129,7 +136,7 @@ namespace TestApp
                 var minute = t1.Minute;
                 while (!_innerSchedule.Seconds.IsPointAllowed(t1.Second))
                 {
-                    t1 = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, t1.Second).AddSeconds(1);
+                    t1 = secondChanger.Change<TrueType>(t1);
                     if (t1.Minute != minute)
                     {
                         goto LoopStart;
@@ -140,7 +147,7 @@ namespace TestApp
                 var second = t1.Second;
                 while (!_innerSchedule.Milliseconds.IsPointAllowed(t1.Millisecond))
                 {
-                    t1 = t1.AddMilliseconds(1);
+                    t1 = millisecondChanger.Change<TrueType>(t1);
                     if (t1.Second != second)
                     {
                         goto LoopStart;
