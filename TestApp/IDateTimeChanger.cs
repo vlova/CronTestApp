@@ -62,7 +62,7 @@ namespace TestApp
             default(TIsIncrementing) switch
             {
                 TrueType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0).AddHours(1),
-                FalseType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0).AddMilliseconds(-1)
+                FalseType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0).AddMilliseconds(-1)
             };
     }    
     
@@ -73,7 +73,7 @@ namespace TestApp
             default(TIsIncrementing) switch
             {
                 TrueType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0).AddMinutes(1),
-                FalseType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, t1.Second).AddMilliseconds(-1)
+                FalseType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0).AddMilliseconds(-1)
             };
     }  
     
