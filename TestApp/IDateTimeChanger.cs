@@ -25,68 +25,85 @@ namespace TestApp
     public struct YearsChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool =>
-            default(TIsIncrementing) switch
+        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool
+        {
+            var baseValue = new DateTime(t1.Year, 1, 1);
+            return default(TIsIncrementing) switch
             {
-                TrueType _ => new DateTime(t1.Year, 1, 1).AddYears(1),
-                FalseType _ => new DateTime(t1.Year, 1, 1).AddMilliseconds(-1)
+                TrueType _ => baseValue.AddYears(1),
+                FalseType _ => baseValue.AddMilliseconds(-1)
             };
+        }
     }
     
     public struct MonthChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool =>
-            default(TIsIncrementing) switch
+        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool
+        {
+            var baseValue = new DateTime(t1.Year, t1.Month, 1);
+            return default(TIsIncrementing) switch
             {
-                TrueType _ => new DateTime(t1.Year, t1.Month, 1).AddMonths(1),
-                FalseType _ => new DateTime(t1.Year, t1.Month, 1).AddMilliseconds(-1)
+                TrueType _ => baseValue.AddMonths(1),
+                FalseType _ => baseValue.AddMilliseconds(-1)
             };
+        }
     }    
     
     public struct DayChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool =>
-            default(TIsIncrementing) switch
+        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool
+        {
+            var baseValue = t1.Date;
+            return default(TIsIncrementing) switch
             {
-                TrueType _ => t1.Date.AddDays(1),
-                FalseType _ => t1.Date.AddMilliseconds(-1)
+                TrueType _ => baseValue.AddDays(1),
+                FalseType _ => baseValue.AddMilliseconds(-1)
             };
+        }
     }    
     
     public struct HourChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool =>
-            default(TIsIncrementing) switch
+        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool
+        {
+            var baseValue = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0);
+            return default(TIsIncrementing) switch
             {
-                TrueType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0).AddHours(1),
-                FalseType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, 0, 0).AddMilliseconds(-1)
+                TrueType _ => baseValue.AddHours(1),
+                FalseType _ => baseValue.AddMilliseconds(-1)
             };
+        }
     }    
     
     public struct MinuteChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool =>
-            default(TIsIncrementing) switch
+        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool
+        {
+            var baseValue = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0);
+            return default(TIsIncrementing) switch
             {
-                TrueType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0).AddMinutes(1),
-                FalseType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, 0).AddMilliseconds(-1)
+                TrueType _ => baseValue.AddMinutes(1),
+                FalseType _ => baseValue.AddMilliseconds(-1)
             };
+        }
     }  
     
     public struct SecondChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool =>
-            default(TIsIncrementing) switch
+        public DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool
+        {
+            var baseValue = new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, t1.Second);
+            return default(TIsIncrementing) switch
             {
-                TrueType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, t1.Second).AddSeconds(1),
-                FalseType _ => new DateTime(t1.Year, t1.Month, t1.Day, t1.Hour, t1.Minute, t1.Second).AddMilliseconds(-1)
+                TrueType _ => baseValue.AddSeconds(1),
+                FalseType _ => baseValue.AddMilliseconds(-1)
             };
-        
+        }
     }
     public struct MillisecondChanger : IDateTimeChanger
     {
