@@ -12,6 +12,7 @@ namespace TestApp.UnitTest
         public void Asterisk()
         {
             ParserHelper.Asterisk.ParseOrThrow("*");
+            Assert.Throws<ParseException>(() => ParserHelper.NumberParser.ParseOrThrow("hello"));
         }
 
         [Fact]

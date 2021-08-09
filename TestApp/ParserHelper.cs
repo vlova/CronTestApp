@@ -27,15 +27,15 @@ namespace TestApp
 
         public static Parser<char, (int begin, int? end)> IntervalParser { get; } =
             from begin in NumberParser
-            from end in Try(Char('-').Then(NumberParser).Optional())
+            from end in Char('-').Then(NumberParser).Optional()
                 .Map(MapMaybeStruct)
             select (begin, end);
 
         public static Parser<char, ScheduleFormatEntry> WholeIntervalParser { get; } =
             from interval in
-                Try(Asterisk.Map(_ => (begin: default(int?), end: default(int?))))
+                Asterisk.Map(_ => (begin: default(int?), end: default(int?)))
                     .Or(IntervalParser.Map(x => ((int?) x.begin, x.end)))
-            from step in Try(Char('/').Then(NumberParser).Optional())
+            from step in Char('/').Then(NumberParser).Optional()
                 .Map(MapMaybeStruct)
             select new ScheduleFormatEntry(interval.begin, interval.end, step);
 
@@ -60,7 +60,8 @@ namespace TestApp
             from min in Validate(IntervalsSequenceParser, ValidateBoundsParser("Min", Constant.MinMinute, Constant.MaxMinute))
             from __ in Char(':')
             from sec in Validate(IntervalsSequenceParser, ValidateBoundsParser("Sec", Constant.MinSec, Constant.MaxSec))
-            from millis in Try(Char('.').Then(Validate(IntervalsSequenceParser, ValidateBoundsParser("Millis", Constant.MinMillis, Constant.MaxMillis))).Optional())
+            from millis in Char('.').Then(Validate(IntervalsSequenceParser, ValidateBoundsParser("Millis", Constant.MinMillis, Constant.MaxMillis)))
+                .Optional()
                 .Map(MapMaybe)
             select new ScheduleTime(hours, min, sec, millis ?? new[] {ScheduleFormatEntry.SinglePoint(0)});
 
