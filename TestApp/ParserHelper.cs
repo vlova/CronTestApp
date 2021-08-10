@@ -40,8 +40,9 @@ namespace TestApp
             select new ScheduleFormatEntry(interval.begin, interval.end, step);
 
         public static Parser<char, ScheduleFormatEntry[]> IntervalsSequenceParser { get; } =
-            WholeIntervalParser.SeparatedAndOptionallyTerminatedAtLeastOnce(Char(',')).Map(x => x.ToArray())
-                .SelectMany(ValidateWildcards(), ((entries, _) => entries));
+            Validate(WholeIntervalParser.SeparatedAndOptionallyTerminatedAtLeastOnce(Char(','))
+                    .Map(x => x.ToArray()),
+                ValidateWildcards());
 
         public static Parser<char, ScheduleDate> DateParser { get; } =
             from years in Validate(IntervalsSequenceParser, ValidateBoundsParser("Year", Constant.MinYear, Constant.MaxYear))
