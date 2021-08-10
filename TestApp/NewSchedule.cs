@@ -92,6 +92,25 @@ namespace TestApp
         
         private DateTime Closest<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool
         {
+            while (true)
+            {
+                var (t2, whatToDo) = ClosestBody<TIsIncrementing>(t1);
+                if (whatToDo == WhatToDo.Continue)
+                {
+                    t1 = t2;
+                }
+                else
+                {
+                    return t2;
+                }
+            }
+        }
+        
+        enum WhatToDo { Continue, Break }
+        
+        private (DateTime, WhatToDo) ClosestBody<TIsIncrementing>(DateTime t1) 
+            where TIsIncrementing : struct, IBool
+        {
             var yearChanger = default(YearsChanger);
             var monthChanger = default(MonthChanger);
             var dayChanger = default(DayChanger);
@@ -99,87 +118,83 @@ namespace TestApp
             var minuteChanger = default(MinuteChanger);
             var secondChanger = default(SecondChanger);
             var millisecondChanger = default(MillisecondChanger);
-            while (true)
+            // search for year
+            while (!_innerSchedule.Years.IsPointAllowed(t1.Year))
             {
-                LoopStart: ;
-                // search for year
-                while (!_innerSchedule.Years.IsPointAllowed(t1.Year))
-                {
-                    t1 = yearChanger.Change<TIsIncrementing>(t1);
-                }
-
-                // search for month
-                var year = t1.Year;
-                while (!_innerSchedule.Months.IsPointAllowed(t1.Month))
-                {
-                    t1 = monthChanger.Change<TIsIncrementing>(t1);
-                    if (t1.Year != year)
-                    {
-                        goto LoopStart;
-                    }
-                }
-
-                // search for day
-                var month = t1.Month;
-                while (!(_innerSchedule.DayOfWeek.IsPointAllowed((int) t1.DayOfWeek)
-                         && (_innerSchedule.Days.IsPointAllowed(t1.Day) ||
-                             _innerSchedule.Days.IsPointAllowed(32)
-                             && t1.Day == DateTime.DaysInMonth(t1.Year, t1.Month))))
-                {
-
-                    t1 = dayChanger.Change<TIsIncrementing>(t1);
-                    if (t1.Month != month)
-                    {
-                        goto LoopStart;
-                    }
-                }
-                
-                // search for hour
-                var day = t1.Day;
-                while (!_innerSchedule.Hours.IsPointAllowed(t1.Hour))
-                {
-                    t1 = hourChanger.Change<TIsIncrementing>(t1);
-                    if (t1.Day != day)
-                    {
-                        goto LoopStart;
-                    }
-                }
-                
-                // search for minute
-                var hour = t1.Hour;
-                while (!_innerSchedule.Minutes.IsPointAllowed(t1.Minute))
-                {
-                    t1 = minuteChanger.Change<TIsIncrementing>(t1);
-                    if (t1.Hour != hour)
-                    {
-                        goto LoopStart;
-                    }
-                }
-                
-                // search for second
-                var minute = t1.Minute;
-                while (!_innerSchedule.Seconds.IsPointAllowed(t1.Second))
-                {
-                    t1 = secondChanger.Change<TIsIncrementing>(t1);
-                    if (t1.Minute != minute)
-                    {
-                        goto LoopStart;
-                    }
-                }
-                
-                // search for second
-                var second = t1.Second;
-                while (!_innerSchedule.Milliseconds.IsPointAllowed(t1.Millisecond))
-                {
-                    t1 = millisecondChanger.Change<TIsIncrementing>(t1);
-                    if (t1.Second != second)
-                    {
-                        goto LoopStart;
-                    }
-                }
-
-                return t1;
+                t1 = yearChanger.Change<TIsIncrementing>(t1);
             }
+
+            // search for month
+            var year = t1.Year;
+            while (!_innerSchedule.Months.IsPointAllowed(t1.Month))
+            {
+                t1 = monthChanger.Change<TIsIncrementing>(t1);
+                if (t1.Year != year)
+                {
+                    return (t1, WhatToDo.Continue);
+                }
+            }
+
+            // search for day
+            var month = t1.Month;
+            while (!(_innerSchedule.DayOfWeek.IsPointAllowed((int) t1.DayOfWeek)
+                     && (_innerSchedule.Days.IsPointAllowed(t1.Day) ||
+                         _innerSchedule.Days.IsPointAllowed(32)
+                         && t1.Day == DateTime.DaysInMonth(t1.Year, t1.Month))))
+            {
+
+                t1 = dayChanger.Change<TIsIncrementing>(t1);
+                if (t1.Month != month)
+                {
+                    return (t1, WhatToDo.Continue);
+                }
+            }
+            
+            // search for hour
+            var day = t1.Day;
+            while (!_innerSchedule.Hours.IsPointAllowed(t1.Hour))
+            {
+                t1 = hourChanger.Change<TIsIncrementing>(t1);
+                if (t1.Day != day)
+                {
+                    return (t1, WhatToDo.Continue);
+                }
+            }
+            
+            // search for minute
+            var hour = t1.Hour;
+            while (!_innerSchedule.Minutes.IsPointAllowed(t1.Minute))
+            {
+                t1 = minuteChanger.Change<TIsIncrementing>(t1);
+                if (t1.Hour != hour)
+                {
+                    return (t1, WhatToDo.Continue);
+                }
+            }
+            
+            // search for second
+            var minute = t1.Minute;
+            while (!_innerSchedule.Seconds.IsPointAllowed(t1.Second))
+            {
+                t1 = secondChanger.Change<TIsIncrementing>(t1);
+                if (t1.Minute != minute)
+                {
+                    return (t1, WhatToDo.Continue);
+                }
+            }
+            
+            // search for second
+            var second = t1.Second;
+            while (!_innerSchedule.Milliseconds.IsPointAllowed(t1.Millisecond))
+            {
+                t1 = millisecondChanger.Change<TIsIncrementing>(t1);
+                if (t1.Second != second)
+                {
+                    return (t1, WhatToDo.Continue);
+                }
+            }
+
+            return (t1, WhatToDo.Break);
         }
     }
 }
