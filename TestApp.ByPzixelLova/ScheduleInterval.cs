@@ -13,6 +13,7 @@ namespace TestApp.ByPzixelLova
 
         private readonly SortedSet<int> _allowedPoints;
         private readonly Dictionary<int, int> _nextPointCache;
+        private readonly Dictionary<int, int> _previousPointCache;
 
         public ScheduleInterval(int begin, int end)
         {
@@ -20,6 +21,7 @@ namespace TestApp.ByPzixelLova
             End = end;
             _allowedPoints = new SortedSet<int>();
             _nextPointCache = new Dictionary<int, int>(capacity: end - begin + 1);
+            _previousPointCache = new Dictionary<int, int>(capacity: end - begin + 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -50,6 +52,38 @@ namespace TestApp.ByPzixelLova
 
             return _allowedPoints.GetViewBetween(point + 1, End).Cast<int?>().FirstOrDefault()
                 ?? Math.Max(point + 1, End);
+        }
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public int PreviousPoint(int point)
+        {
+            if (_previousPointCache.TryGetValue(point, out var prevValue))
+            {
+                return prevValue;
+            }
+            else
+            {
+                var newPrevValue = PreviousPointUncached(point);
+                _previousPointCache.Add(point, newPrevValue);
+                return newPrevValue;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private int PreviousPointUncached(int point)
+        {
+            if (point <= Begin)
+            {
+                return point - 1;
+            }
+
+            var subView = _allowedPoints.GetViewBetween(Begin, point - 1);
+
+            return subView.Count != 0
+                ? subView.Max
+                : Math.Min(point - 1, Begin);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
