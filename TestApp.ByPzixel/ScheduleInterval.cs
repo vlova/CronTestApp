@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace TestApp
+namespace TestApp.ByPzixel
 {
     public readonly struct ScheduleInterval : IEnumerable<(int Point, bool IsAllowed)>
     {

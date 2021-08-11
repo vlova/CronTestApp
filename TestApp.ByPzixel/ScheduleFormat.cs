@@ -1,6 +1,6 @@
 using System;
 
-namespace TestApp
+namespace TestApp.ByPzixel
 {
     public record ScheduleFormat(
         ScheduleDate Date,

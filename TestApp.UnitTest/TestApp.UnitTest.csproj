@@ -25,6 +25,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\TestApp.ByNovar0\TestApp.ByNovar0.csproj" />
+        <ProjectReference Include="..\TestApp.ByPzixel\TestApp.ByPzixel.csproj" />
         <ProjectReference Include="..\TestApp\TestApp.csproj" />
     </ItemGroup>
 

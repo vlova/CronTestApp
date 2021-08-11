@@ -1,4 +1,4 @@
-namespace TestApp
+namespace TestApp.ByPzixel
 {
     public static class Constant
     {

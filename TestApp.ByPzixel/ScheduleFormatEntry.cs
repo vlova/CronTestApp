@@ -1,4 +1,4 @@
-namespace TestApp
+namespace TestApp.ByPzixel
 {
     public record ScheduleFormatEntry(int? Begin, int? End, int? Step)
     {

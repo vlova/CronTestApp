@@ -1,10 +1,11 @@
 using System;
 using System.Globalization;
+using TestApp.ByPzixel;
 using Xunit;
 
 namespace TestApp.UnitTest
 {
-	public class NewScheduleCopypastedCopypasteTests
+	public class PzixelScheduleCopypasteTests
 	{
 		[Theory]
 		[InlineData ("2100.12.31 23:59:59.999", "2000-01-01 00:00:00.000", "2100-12-31 23:59:59.999")] // макс. количество итераций при проверке
@@ -26,7 +27,7 @@ namespace TestApp.UnitTest
 		[InlineData ("*.*.32 12:00:00", "2020-01-31 12:00:00.001", "2020-02-29 12:00:00.000")]
 		public void NearestEvent (string scheduleString, string time, string expectedResult)
 		{
-			var schedule = new NewScheduleCopypasted (scheduleString);
+			var schedule = new PzixelScheduleCopypasted (scheduleString);
 			Assert.Equal(ParseTime (expectedResult), schedule.NearestEvent (ParseTime (time)));
 		}
 
@@ -50,7 +51,7 @@ namespace TestApp.UnitTest
 		[InlineData ("*.*.32 12:00:00", "2020-01-31 12:00:00.000", "2020-02-29 12:00:00.000")]
 		public void NextEvent (string scheduleString, string time, string expectedResult)
 		{
-			var schedule = new NewScheduleCopypasted (scheduleString);
+			var schedule = new PzixelScheduleCopypasted (scheduleString);
 			Assert.Equal (ParseTime (expectedResult), schedule.NextEvent (ParseTime (time)));
 		}
 
@@ -74,7 +75,7 @@ namespace TestApp.UnitTest
 		[InlineData ("*.*.32 12:00:00", "2020-03-29 00:00:00.000", "2020-02-29 12:00:00.000")]
 		public void NearestPrevEvent (string scheduleString, string time, string expectedResult)
 		{
-			var schedule = new NewScheduleCopypasted (scheduleString);
+			var schedule = new PzixelScheduleCopypasted (scheduleString);
 			Assert.Equal (ParseTime (expectedResult), schedule.NearestPrevEvent (ParseTime (time)));
 		}
 		
@@ -98,7 +99,7 @@ namespace TestApp.UnitTest
 		[InlineData ("*.*.32 12:00:00", "2020-03-29 00:00:00.000", "2020-02-29 12:00:00.000")]
 		public void PrevEvent (string scheduleString, string time, string expectedResult)
 		{
-			var schedule = new NewScheduleCopypasted (scheduleString);
+			var schedule = new PzixelScheduleCopypasted (scheduleString);
 			Assert.Equal (ParseTime (expectedResult), schedule.PrevEvent (ParseTime (time)));
 		}
 

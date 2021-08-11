@@ -1,9 +1,9 @@
 using System;
 using Pidgin;
 
-namespace TestApp
+namespace TestApp.ByPzixel
 {
-    public class NewSchedule
+    public class PzixelSchedule
     {
         private readonly MergedSchedule _innerSchedule;
 
@@ -11,7 +11,7 @@ namespace TestApp
         /// Создает пустой экземпляр, который будет соответствовать
         /// расписанию типа "*.*.* * *:*:*.*" (раз в 1 мс).
         /// </summary>
-        public NewSchedule()
+        public PzixelSchedule()
             : this("*.*.* * *:*:*.*")
         {
         }
@@ -54,9 +54,9 @@ namespace TestApp
         ///     *.*.01 01:30:00
         ///     означает 01:30 по первым числам каждого месяца
         /// </param>
-        public NewSchedule(string scheduleString)
+        public PzixelSchedule(string scheduleString)
         {
-            var format = ParserHelper.FullFormatParser.ParseOrThrow(scheduleString);
+            var format = PzixelParserHelper.FullFormatParser.ParseOrThrow(scheduleString);
             _innerSchedule = MergedSchedule.FromFormat(format);
         }
 

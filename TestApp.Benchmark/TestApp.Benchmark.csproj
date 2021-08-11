@@ -8,12 +8,14 @@
 
     <PropertyGroup>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <WarningsAsErrors/>
+        <WarningsAsErrors />
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.13.0"/>
-        <ProjectReference Include="..\TestApp\TestApp.csproj"/>
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
+        <ProjectReference Include="..\TestApp.ByNovar0\TestApp.ByNovar0.csproj" />
+        <ProjectReference Include="..\TestApp.ByPzixel\TestApp.ByPzixel.csproj" />
+        <ProjectReference Include="..\TestApp\TestApp.csproj" />
     </ItemGroup>
 
 </Project>

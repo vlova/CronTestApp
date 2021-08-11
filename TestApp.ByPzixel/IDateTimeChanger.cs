@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 #pragma warning disable 8509
 
-namespace TestApp
+namespace TestApp.ByPzixel
 {
     public interface IBool
     {
@@ -16,7 +16,7 @@ namespace TestApp
     public struct FalseType : IBool
     {
     }
-    
+
     public interface IDateTimeChanger
     {
         DateTime Change<TIsIncrementing>(DateTime t1) where TIsIncrementing : struct, IBool;
@@ -35,7 +35,7 @@ namespace TestApp
             };
         }
     }
-    
+
     public struct MonthChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -48,8 +48,8 @@ namespace TestApp
                 FalseType _ => baseValue.AddMilliseconds(-1)
             };
         }
-    }    
-    
+    }
+
     public struct DayChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -62,8 +62,8 @@ namespace TestApp
                 FalseType _ => baseValue.AddMilliseconds(-1)
             };
         }
-    }    
-    
+    }
+
     public struct HourChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -76,8 +76,8 @@ namespace TestApp
                 FalseType _ => baseValue.AddMilliseconds(-1)
             };
         }
-    }    
-    
+    }
+
     public struct MinuteChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -90,8 +90,8 @@ namespace TestApp
                 FalseType _ => baseValue.AddMilliseconds(-1)
             };
         }
-    }  
-    
+    }
+
     public struct SecondChanger : IDateTimeChanger
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

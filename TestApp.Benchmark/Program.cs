@@ -3,6 +3,8 @@ using System.Globalization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using TestApp.ByNovar0;
+using TestApp.ByPzixel;
 
 namespace TestApp.Benchmark
 {
@@ -24,13 +26,13 @@ namespace TestApp.Benchmark
         [Benchmark(Baseline = true)]
         public object ParsingOld()
         {
-            return new Schedule(Pattern);
+            return new Novar0Schedule(Pattern);
         }
 
         [Benchmark]
         public object ParsingNew()
         {
-            return new NewSchedule(Pattern);
+            return new PzixelSchedule(Pattern);
         }
     }
 
@@ -44,27 +46,27 @@ namespace TestApp.Benchmark
         [Params("2001-01-01", "2080-05-05")] public string DateString = null!;
 
         private DateTime Date;
-        private Schedule OldSchedule = null!;
-        private NewSchedule NewSchedule = null!;
-        private NewScheduleCopypasted NewScheduleCopypasted = null!;
+        private Novar0Schedule Novar0Schedule = null!;
+        private PzixelSchedule PzixelSchedule = null!;
+        private PzixelScheduleCopypasted PzixelScheduleCopypasted = null!;
 
         [GlobalSetup]
         public void Setup()
         {
             Date = DateTime.ParseExact(DateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-            OldSchedule = new Schedule(Pattern);
-            NewSchedule = new NewSchedule(Pattern);
-            NewScheduleCopypasted = new NewScheduleCopypasted(Pattern);
+            Novar0Schedule = new Novar0Schedule(Pattern);
+            PzixelSchedule = new PzixelSchedule(Pattern);
+            PzixelScheduleCopypasted = new PzixelScheduleCopypasted(Pattern);
         }
 
         [Benchmark(Baseline = true)]
-        public object FindNextOld() => OldSchedule.NextEvent(Date);
+        public object FindNextOld() => Novar0Schedule.NextEvent(Date);
 
         [Benchmark]
-        public object FindNextNewCopypasted() => NewScheduleCopypasted.NextEvent(Date);
+        public object FindNextNewCopypasted() => PzixelScheduleCopypasted.NextEvent(Date);
 
         [Benchmark]
-        public object FindNextNewTypelevel() => NewSchedule.NextEvent(Date);
+        public object FindNextNewTypelevel() => PzixelSchedule.NextEvent(Date);
     }
 
     [SimpleJob(RuntimeMoniker.Net50)]
@@ -77,26 +79,26 @@ namespace TestApp.Benchmark
         [Params("2001-01-01", "2080-05-05")] public string DateString = null!;
 
         private DateTime Date;
-        private Schedule OldSchedule = null!;
-        private NewSchedule NewSchedule = null!;
-        private NewScheduleCopypasted NewScheduleCopypasted = null!;
+        private Novar0Schedule Novar0Schedule = null!;
+        private PzixelSchedule PzixelSchedule = null!;
+        private PzixelScheduleCopypasted PzixelScheduleCopypasted = null!;
 
         [GlobalSetup]
         public void Setup()
         {
             Date = DateTime.ParseExact(DateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-            OldSchedule = new Schedule(Pattern);
-            NewSchedule = new NewSchedule(Pattern);
-            NewScheduleCopypasted = new NewScheduleCopypasted(Pattern);
+            Novar0Schedule = new Novar0Schedule(Pattern);
+            PzixelSchedule = new PzixelSchedule(Pattern);
+            PzixelScheduleCopypasted = new PzixelScheduleCopypasted(Pattern);
         }
 
         [Benchmark(Baseline = true)]
-        public object FindPrevOld() => OldSchedule.PrevEvent(Date);
+        public object FindPrevOld() => Novar0Schedule.PrevEvent(Date);
 
         [Benchmark]
-        public object FindPrevNewCopypasted() => NewScheduleCopypasted.PrevEvent(Date);
+        public object FindPrevNewCopypasted() => PzixelScheduleCopypasted.PrevEvent(Date);
 
         [Benchmark]
-        public object FindPrevNewTypelevel() => NewSchedule.PrevEvent(Date);
+        public object FindPrevNewTypelevel() => PzixelSchedule.PrevEvent(Date);
     }
 }

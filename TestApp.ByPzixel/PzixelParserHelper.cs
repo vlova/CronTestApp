@@ -3,7 +3,7 @@ using System.Linq;
 using Pidgin;
 using static Pidgin.Parser;
 
-namespace TestApp
+namespace TestApp.ByPzixel
 {
     /// Формат строки:
     ///     yyyy.MM.dd w HH:mm:ss.fff
@@ -20,7 +20,7 @@ namespace TestApp
     ///     mm - минуты (0-59)
     ///     ss - секунды (0-59)
     ///     fff - миллисекунды (0-999). Если не указаны, то 0
-    public static class ParserHelper
+    public static class PzixelParserHelper
     {
         public static Parser<char, Unit> Asterisk { get; } = Char('*').Map(_ => Unit.Value);
         public static Parser<char, int> NumberParser { get; } = Digit.AtLeastOnce().Map(s => int.Parse(new string(s.ToArray())));
@@ -34,7 +34,7 @@ namespace TestApp
         public static Parser<char, ScheduleFormatEntry> WholeIntervalParser { get; } =
             from interval in
                 Asterisk.Map(_ => (begin: default(int?), end: default(int?)))
-                    .Or(IntervalParser.Map(x => ((int?) x.begin, x.end)))
+                    .Or(IntervalParser.Map(x => ((int?)x.begin, x.end)))
             from step in Char('/').Then(NumberParser).Optional()
                 .Map(MapMaybeStruct)
             select new ScheduleFormatEntry(interval.begin, interval.end, step);
@@ -64,7 +64,7 @@ namespace TestApp
             from millis in Char('.').Then(Validate(IntervalsSequenceParser, GetBoundsCheck("Millis", Constant.MinMillis, Constant.MaxMillis)))
                 .Optional()
                 .Map(MapMaybe)
-            select new ScheduleTime(hours, min, sec, millis ?? new[] {ScheduleFormatEntry.SinglePoint(0)});
+            select new ScheduleTime(hours, min, sec, millis ?? new[] { ScheduleFormatEntry.SinglePoint(0) });
 
         public static Parser<char, ScheduleFormat> FullFormatParser { get; } =
             from date in Try(DateParser).Before(Char(' ')).Optional().Map(MapMaybe)
@@ -72,11 +72,11 @@ namespace TestApp
             from time in TimeParser
             select new ScheduleFormat(
                 date ?? new ScheduleDate(
-                    new []{ScheduleFormatEntry.Always},
-                    new []{ScheduleFormatEntry.Always},
-                    new []{ScheduleFormatEntry.Always}
-                    ), 
-                dayOfWeek ?? new []{ScheduleFormatEntry.Always}, 
+                    new[] { ScheduleFormatEntry.Always },
+                    new[] { ScheduleFormatEntry.Always },
+                    new[] { ScheduleFormatEntry.Always }
+                    ),
+                dayOfWeek ?? new[] { ScheduleFormatEntry.Always },
                 time);
 
         private static Parser<char, ScheduleFormatEntry[]> Validate(Parser<char, ScheduleFormatEntry[]> parser,
@@ -91,10 +91,10 @@ namespace TestApp
                     return Parser<char>.Fail<Unit>(
                         $"Cannot have more than one wildcard entry in schedule");
                 }
-                
+
                 return Parser<char>.Return(Unit.Value);
             };
-        
+
         private static Func<ScheduleFormatEntry[], Parser<char, Unit>> GetBoundsCheck(string formatPart, int min, int max) =>
             entries =>
             {
@@ -110,9 +110,9 @@ namespace TestApp
                 return Parser<char>.Return(Unit.Value);
             };
 
-        private static T? MapMaybe<T>(Maybe<T> maybe) where T : class =>
+        private static T MapMaybe<T>(Maybe<T> maybe) where T : class =>
             maybe.HasValue ? maybe.GetValueOrDefault() : null;
-        
+
         private static T? MapMaybeStruct<T>(Maybe<T> maybe) where T : struct =>
             maybe.HasValue ? maybe.GetValueOrDefault() : null;
     }
