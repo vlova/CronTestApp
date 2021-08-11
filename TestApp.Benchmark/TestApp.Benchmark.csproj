@@ -14,6 +14,7 @@
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
         <ProjectReference Include="..\TestApp.ByNovar0\TestApp.ByNovar0.csproj" />
+        <ProjectReference Include="..\TestApp.ByPzixelLova\TestApp.ByPzixelLova.csproj" />
         <ProjectReference Include="..\TestApp.ByPzixel\TestApp.ByPzixel.csproj" />
         <ProjectReference Include="..\TestApp\TestApp.csproj" />
     </ItemGroup>

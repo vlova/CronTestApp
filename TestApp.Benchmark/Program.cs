@@ -5,6 +5,7 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using TestApp.ByNovar0;
 using TestApp.ByPzixel;
+using TestApp.ByPzixelLova;
 
 namespace TestApp.Benchmark
 {
@@ -48,7 +49,7 @@ namespace TestApp.Benchmark
         private DateTime Date;
         private Novar0Schedule Novar0Schedule = null!;
         private PzixelSchedule PzixelSchedule = null!;
-        private PzixelScheduleCopypasted PzixelScheduleCopypasted = null!;
+        private PzixelLovaSchedule PzixelLovaSchedule = null!;
 
         [GlobalSetup]
         public void Setup()
@@ -56,17 +57,17 @@ namespace TestApp.Benchmark
             Date = DateTime.ParseExact(DateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             Novar0Schedule = new Novar0Schedule(Pattern);
             PzixelSchedule = new PzixelSchedule(Pattern);
-            PzixelScheduleCopypasted = new PzixelScheduleCopypasted(Pattern);
+            PzixelLovaSchedule = new PzixelLovaSchedule(Pattern);
         }
 
         [Benchmark(Baseline = true)]
-        public object FindNextOld() => Novar0Schedule.NextEvent(Date);
+        public object FindNextNovar0() => Novar0Schedule.NextEvent(Date);
 
         [Benchmark]
-        public object FindNextNewCopypasted() => PzixelScheduleCopypasted.NextEvent(Date);
+        public object FindNextPzixel() => PzixelSchedule.NextEvent(Date);
 
         [Benchmark]
-        public object FindNextNewTypelevel() => PzixelSchedule.NextEvent(Date);
+        public object FindNextPzixelLovaSortedSetCached() => PzixelLovaSchedule.NextEvent(Date);
     }
 
     [SimpleJob(RuntimeMoniker.Net50)]
@@ -81,7 +82,7 @@ namespace TestApp.Benchmark
         private DateTime Date;
         private Novar0Schedule Novar0Schedule = null!;
         private PzixelSchedule PzixelSchedule = null!;
-        private PzixelScheduleCopypasted PzixelScheduleCopypasted = null!;
+        private PzixelLovaSchedule PzixelLovaSchedule = null!;
 
         [GlobalSetup]
         public void Setup()
@@ -89,16 +90,16 @@ namespace TestApp.Benchmark
             Date = DateTime.ParseExact(DateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             Novar0Schedule = new Novar0Schedule(Pattern);
             PzixelSchedule = new PzixelSchedule(Pattern);
-            PzixelScheduleCopypasted = new PzixelScheduleCopypasted(Pattern);
+            PzixelLovaSchedule = new PzixelLovaSchedule(Pattern);
         }
 
         [Benchmark(Baseline = true)]
-        public object FindPrevOld() => Novar0Schedule.PrevEvent(Date);
+        public object FindPrevNovar0() => Novar0Schedule.PrevEvent(Date);
 
         [Benchmark]
-        public object FindPrevNewCopypasted() => PzixelScheduleCopypasted.PrevEvent(Date);
+        public object FindPrevPzixel() => PzixelSchedule.PrevEvent(Date);
 
         [Benchmark]
-        public object FindPrevNewTypelevel() => PzixelSchedule.PrevEvent(Date);
+        public object FindPrevPzixelLovaSortedSetCached() => PzixelLovaSchedule.PrevEvent(Date);
     }
 }

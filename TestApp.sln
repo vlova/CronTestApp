@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp.Benchmark", "TestAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp.UnitTest", "TestApp.UnitTest\TestApp.UnitTest.csproj", "{F8C8B4A1-947D-49E4-8F3E-CE708708616D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp.ByPzixel", "TestApp.ByPzixel\TestApp.ByPzixel.csproj", "{6225F4C8-12E6-4798-B71C-4AC92D44866B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp.ByPzixel", "TestApp.ByPzixel\TestApp.ByPzixel.csproj", "{6225F4C8-12E6-4798-B71C-4AC92D44866B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp.ByNovar0", "TestApp.ByNovar0\TestApp.ByNovar0.csproj", "{2FE93F62-56C2-453C-9E7C-546282B84169}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp.ByNovar0", "TestApp.ByNovar0\TestApp.ByNovar0.csproj", "{2FE93F62-56C2-453C-9E7C-546282B84169}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp.ByPzixelLova", "TestApp.ByPzixelLova\TestApp.ByPzixelLova.csproj", "{14C342EB-FDBB-443B-A03E-4978F91AB268}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{2FE93F62-56C2-453C-9E7C-546282B84169}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FE93F62-56C2-453C-9E7C-546282B84169}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FE93F62-56C2-453C-9E7C-546282B84169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14C342EB-FDBB-443B-A03E-4978F91AB268}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14C342EB-FDBB-443B-A03E-4978F91AB268}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14C342EB-FDBB-443B-A03E-4978F91AB268}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14C342EB-FDBB-443B-A03E-4978F91AB268}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
